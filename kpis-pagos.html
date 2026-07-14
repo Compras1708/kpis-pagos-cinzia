@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Kpis Pagos",
+  "schemaVersion": 1,
+  "description": "Proyección mensual de desembolsos (echeqs + transferencias históricas + cheques/transferencias/efectivo por girar según fecha de pago prevista) con gráfico de barras apiladas, KPIs, cuadro de deudas y tabla de proveedores. Fuente: planilla \"Historial de pagos\"."
+}
+</script>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>KPIs Pagos · Echeqs, Transferencias y Por Girar</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+<style>
+  :root { color-scheme: light; --ech:#FB8C00; --tr:#FBC02D; --pg:#8E24AA; --trpg:#00897B; --efpg:#3949AB; --deuda:#D32F2F; --ink:#1f1f1f; --muted:#666; --line:#e5e5e5; --bg:#fafafa; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
+  .wrap { max-width: 1400px; margin: 0 auto; padding: 28px 32px; }
+
+  header { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; margin-bottom: 6px; }
+  header h1 { font-size: 28px; font-weight: 700; margin: 0; letter-spacing: -0.4px; }
+  header .date { font-size: 13px; color: var(--muted); }
+  header .now { background: #fff3cd; color: #6d4400; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 26px; }
+
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 26px; }
+  .kpi { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; position: relative; }
+  .kpi::before { content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 4px; border-radius: 0 3px 3px 0; }
+  .kpi.ech::before { background: var(--ech); }
+  .kpi.tr::before { background: var(--tr); }
+  .kpi.pg::before { background: var(--pg); }
+  .kpi.trpg::before { background: var(--trpg); }
+  .kpi.efpg::before { background: var(--efpg); }
+  .kpi.total::before { background: #424242; }
+  .kpi .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; padding-left: 8px; }
+  .kpi .val { font-size: 26px; font-weight: 800; margin-top: 6px; padding-left: 8px; line-height: 1.1; }
+  .kpi .sub { font-size: 11px; color: var(--muted); margin-top: 4px; padding-left: 8px; }
+
+  .layout { display: grid; grid-template-columns: 180px 1fr; gap: 22px; margin-bottom: 26px; }
+  .sidebar { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 16px; height: fit-content; }
+  .sidebar h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin: 0 0 12px; font-weight: 700; }
+  .month-list { display: flex; flex-direction: column; gap: 4px; }
+  .mbtn {
+    display: flex; align-items: center; gap: 9px;
+    background: #fff; color: #555;
+    border: 1.5px solid #ddd; border-radius: 7px;
+    padding: 8px 10px; font-size: 13px; font-weight: 500;
+    cursor: pointer; text-align: left;
+    transition: all 0.12s;
+  }
+  .mbtn .chk { width: 16px; height: 16px; border: 1.5px solid #bbb; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; line-height: 1; color: transparent; flex-shrink: 0; }
+  .mbtn:hover { background: #f5f5f5; border-color: #aaa; }
+  .mbtn.on { background: #1976D2; color: #fff; border-color: #1976D2; font-weight: 600; }
+  .mbtn.on .chk { background: #fff; border-color: #fff; color: #1976D2; }
+  .mbtn.now { border-color: #FFA000; }
+  .mbtn.now::after { content: "·hoy"; font-size: 10px; opacity: 0.7; margin-left: auto; }
+  .mbtn.on.now { background: #FF8F00; border-color: #FF8F00; }
+  .quick-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+  .quick-row button { background: #f5f5f5; border: 1px solid #ddd; border-radius: 6px; padding: 6px; font-size: 11px; cursor: pointer; font-weight: 600; color: #555; }
+  .quick-row button:hover { background: #eee; }
+
+  .chartcard { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 20px 22px; }
+  .chartcard h2 { font-size: 16px; font-weight: 700; margin: 0 0 4px; }
+  .chartcard .ssub { font-size: 12px; color: var(--muted); margin-bottom: 18px; }
+  .chart-wrap { position: relative; height: 380px; }
+  .legendrow { display: flex; gap: 18px; font-size: 13px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); flex-wrap: wrap; }
+  .legendrow .it { display: flex; align-items: center; gap: 7px; font-weight: 500; }
+  .legendrow .swatch { width: 13px; height: 13px; border-radius: 3px; flex-shrink: 0; }
+
+  .topcard { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 20px 22px; }
+  .topcard header { margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .topcard header h2 { font-size: 16px; font-weight: 700; margin: 0; }
+  .topcard header .filter-info { font-size: 12px; color: var(--muted); }
+  .top-list { display: flex; flex-direction: column; gap: 8px; }
+  .top-item { display: grid; grid-template-columns: 30px 1fr; gap: 12px; align-items: center; padding: 6px 0; }
+  .top-item .rank { color: var(--muted); font-weight: 700; font-size: 13px; text-align: right; }
+  .top-item .data { position: relative; }
+  .top-item .row1 { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 5px; }
+  .top-item .pname { font-weight: 600; font-size: 14px; }
+  .top-item .pamt { font-weight: 700; font-size: 13px; color: #1976D2; font-variant-numeric: tabular-nums; }
+  .top-item .bar { height: 7px; background: linear-gradient(90deg, #1565C0, #42A5F5); border-radius: 4px; }
+  .top-item.gold .bar { background: linear-gradient(90deg, #FF8F00, #FFB300); }
+  .top-item.silver .bar { background: linear-gradient(90deg, #757575, #9E9E9E); }
+  .top-item.bronze .bar { background: linear-gradient(90deg, #6D4C41, #A1887F); }
+
+  .deudascard { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 20px 22px; margin-top: 22px; }
+  .deudascard header { margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .deudascard header h2 { font-size: 16px; font-weight: 700; margin: 0; }
+  .deudascard header .dsub { font-size: 12px; color: var(--muted); }
+  table.deudas-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.deudas-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); border-bottom: 1.5px solid var(--line); padding: 8px 10px; }
+  table.deudas-table td { padding: 9px 10px; border-bottom: 1px solid var(--line); }
+  table.deudas-table td.amt { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--deuda); }
+  table.deudas-table tr.totrow td { border-top: 2px solid var(--ink); border-bottom: none; font-weight: 800; padding-top: 12px; }
+  table.deudas-table tr.totrow td.amt { color: var(--ink); font-size: 15px; }
+  .method-tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 999px; margin-left: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .method-tag.efectivo { background: #FFF3E0; color: #E65100; }
+  .method-tag.echeq { background: #FFF8E1; color: #F57F17; }
+  .method-tag.transferencia { background: #E0F2F1; color: #00695C; }
+
+  .footer-note { color: var(--muted); font-size: 12px; margin-top: 24px; text-align: center; padding: 12px; background: #fff; border-radius: 8px; border: 1px solid var(--line); line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>📊 KPIs Pagos</h1>
+    <span class="date">Hoy: 14/7/2026</span>
+    <span class="now">Mes actual: Julio 2026</span>
+  </header>
+  <p class="subtitle" id="subtitle">Proyección de liquidez: echeqs + transferencias (historial) y cheques + transferencias + efectivo por girar (según fecha de pago prevista)</p>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <h3>Filtrar meses</h3>
+      <div class="month-list" id="monthList"></div>
+      <div class="quick-row">
+        <button id="btnAll">Todos</button>
+        <button id="btnNone">Ninguno</button>
+      </div>
+      <div class="quick-row" style="margin-top:6px; border-top:none; padding-top:0;">
+        <button id="btnNow">Solo julio</button>
+        <button id="btnInv">Invertir</button>
+      </div>
+      <div class="quick-row" style="margin-top:6px; border-top:none; padding-top:0;">
+        <label style="font-size:11px;color:#666;display:block;">Año:</label>
+        <select id="yearSel" style="grid-column:1/3; padding:6px; border:1px solid #ddd; border-radius:6px; font-size:12px;">
+          <option value="todos">Todos</option>
+          <option value="2025">2025</option>
+          <option value="2026" selected>2026</option>
+        </select>
+      </div>
+    </aside>
+
+    <div class="chartcard">
+      <h2 id="chartTitle">Pagos por mes (fecha de pago prevista)</h2>
+      <div class="ssub">Naranja = echeqs (historial). Amarillo = transferencias (historial). Morado = cheques por girar. Verde = transferencias por girar. Índigo = efectivo por girar.</div>
+      <div class="chart-wrap"><canvas id="chartTotal"></canvas></div>
+      <div class="legendrow">
+        <div class="it"><span class="swatch" style="background:#FB8C00"></span>Echeqs (historial)</div>
+        <div class="it"><span class="swatch" style="background:#FBC02D"></span>Transferencias (historial)</div>
+        <div class="it"><span class="swatch" style="background:#8E24AA"></span>Cheques por girar</div>
+        <div class="it"><span class="swatch" style="background:#00897B"></span>Transferencias por girar</div>
+        <div class="it"><span class="swatch" style="background:#3949AB"></span>Efectivo por girar</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="topcard">
+    <header>
+      <h2>🏆 Principales proveedores</h2>
+      <span class="filter-info" id="topInfo">Top 15 · todo (echeqs + transferencias + por girar)</span>
+    </header>
+    <div class="top-list" id="topList"></div>
+  </div>
+
+  <div class="deudascard">
+    <header>
+      <h2>🧾 Deudas</h2>
+      <span class="dsub">Saldos pendientes por proveedor (planilla "Deudas") — no incluidas en el gráfico mensual para evitar duplicar con los cheques/transferencias por girar</span>
+    </header>
+    <table class="deudas-table" id="deudasTable"></table>
+  </div>
+
+  <div class="footer-note" id="footerNote"></div>
+</div>
+
+<script>
+const ECHEQS = [
+  [2025,8,12,874167,"Rancagua"],[2025,8,22,874167,"Rancagua"],
+  [2025,7,23,607189,"Ausili"],[2025,8,7,607189,"Ausili"],[2025,8,22,607189,"Ausili"],
+  [2025,8,10,1304576,"Alfaser"],
+  [2025,7,25,986941,"Carpack"],[2025,8,9,986941,"Carpack"],[2025,8,16,986941,"Carpack"],
+  [2025,7,10,1405071,"Cattaneo"],[2025,7,11,1405071,"Cattaneo"],[2025,8,9,1405071,"Cattaneo"],
+  [2025,9,8,1405071,"Cattaneo"],[2025,10,8,1405071,"Cattaneo"],[2025,11,7,1405071,"Cattaneo"],
+  [2025,7,12,254100,"Menapace"],[2025,7,26,592000,"Menapace"],
+  [2025,7,14,749500,"Cáceres ferretería"],[2025,7,24,749500,"Cáceres ferretería"],
+  [2025,7,10,158887,"Marcos Veglia"],[2025,8,9,158887,"Marcos Veglia"],[2025,9,8,158887,"Marcos Veglia"],
+  [2025,7,25,1381000,"Mauro Trovato"],[2025,8,9,1381000,"Mauro Trovato"],
+  [2025,7,20,52519,"Gema"],
+  [2025,8,7,6605309,"Caram"],[2025,9,6,6605309,"Caram"],[2025,9,21,6605309,"Caram"],
+  [2025,8,21,909782,"Richetta"],[2025,9,22,909782,"Richetta"],
+  [2025,8,4,1185000,"Ventanas DT"],[2025,8,19,1185000,"Ventanas DT"],[2025,8,29,1185000,"Ventanas DT"],[2025,9,15,1185000,"Ventanas DT"],
+  [2025,8,18,1104633,"Policor"],
+  [2025,8,3,770381,"Textiles del suquía"],[2025,8,18,770381,"Textiles del suquía"],[2025,9,2,770381,"Textiles del suquía"],
+  [2025,7,21,450736,"Siccba"],[2025,8,3,450736,"Siccba"],
+  [2025,8,3,4167361,"Caram"],[2025,8,18,4167361,"Caram"],
+  [2025,7,21,698815,"Cattaneo"],[2025,8,18,698815,"Cattaneo"],[2025,9,18,698815,"Cattaneo"],[2025,10,18,698815,"Cattaneo"],[2025,11,18,698815,"Cattaneo"],
+  [2025,7,21,751682,"Alfaser"],[2025,7,21,627664,"Welter"],
+  [2025,8,3,241948,"Rancagua"],[2025,8,18,241948,"Rancagua"],
+  [2025,7,21,216440,"Credifin"],
+  [2025,8,21,3130370,"Rusmar"],[2025,9,22,3130370,"Rusmar"],
+  [2025,8,6,1381276,"Nelson pinturas"],
+  [2025,8,6,163146,"Peusso"],[2025,8,21,163146,"Peusso"],
+  [2025,8,21,162702,"Todo Fer"],[2025,9,22,162702,"Todo Fer"],
+  [2025,8,29,363204,"Tapihouse"],[2025,8,7,166454,"Ventanas DT"],
+  [2025,9,5,585600,"G y G"],
+  [2025,8,7,3688194,"Marco Aurelio Sosa"],[2025,9,3,3688194,"Marco Aurelio Sosa"],[2025,10,3,3688194,"Marco Aurelio Sosa"],[2025,11,2,3688194,"Marco Aurelio Sosa"],[2025,12,2,3688194,"Marco Aurelio Sosa"],
+  [2025,8,19,147739,"Sbacco"],[2025,9,4,147739,"Sbacco"],
+  [2025,8,7,641358,"Experto"],[2025,8,17,625641,"Experto"],[2025,9,17,625641,"Experto"],[2025,10,17,625641,"Experto"],
+  [2025,8,7,259101,"Experto"],[2025,8,7,563751,"Experto"],
+  [2025,8,7,133538,"Gema"],[2025,8,19,133538,"Gema"],
+  [2025,8,7,3376596,"Caram"],[2025,8,20,3376596,"Caram"],[2025,9,5,3376596,"Caram"],[2025,9,18,3376596,"Caram"],
+  [2025,9,4,5226579,"Experto"],[2025,9,18,5226579,"Experto"],[2025,10,3,5226579,"Experto"],[2025,10,20,5226579,"Experto"],
+  [2025,8,19,181466,"Contigiani"],[2025,9,4,181466,"Contigiani"],[2025,9,18,181466,"Contigiani"],
+  [2025,8,7,163350,"Lonas Bedran"],
+  [2025,8,20,662916,"Rancagua"],[2025,9,6,662916,"Rancagua"],
+  [2025,8,7,534973,"Panelcar"],
+  [2025,8,13,841038,"Neil"],[2025,9,12,841038,"Neil"],[2025,10,13,841038,"Neil"],[2025,11,11,841038,"Neil"],
+  [2025,9,18,877135,"Tapihouse"],
+  [2025,8,22,1700000,"Wurth"],[2025,9,15,4192369,"Wurth"],
+  [2025,9,22,687720,"Rancagua"],[2025,10,6,687720,"Rancagua"],[2025,10,21,687720,"Rancagua"],
+  [2025,9,26,649576,"Policor"],
+  [2025,8,17,5226579,"Experto"],[2025,8,17,5226579,"Experto"],
+  [2025,10,8,849260,"Dintra"],[2025,11,10,849260,"Dintra"],
+  [2025,9,8,116160,"Buss distribuidora"],[2025,9,23,116160,"Buss distribuidora"],
+  [2025,9,8,213300,"Cuello herrajes"],
+  [2025,10,8,558134,"Proyectando"],
+  [2025,9,18,3354338,"Caram"],
+  [2025,9,8,371019,"Textiles del suquía"],[2025,9,22,1044488,"Textiles del suquía"],[2025,10,5,1044488,"Textiles del suquía"],
+  [2025,9,29,375169,"Ipipsa"],[2025,9,29,783275,"Resinfibras"],
+  [2025,10,8,558324,"Todo Fer"],[2025,11,7,558324,"Todo Fer"],
+  [2025,9,22,11589427,"Alpros"],
+  [2025,9,8,1797533,"Experto"],[2025,9,8,1797533,"Cattaneo"],
+  [2025,10,8,489140,"Cattaneo"],[2025,11,10,489140,"Cattaneo"],[2025,12,10,489140,"Cattaneo"],
+  [2025,9,8,1797533,"Experto"],
+  [2025,10,2,176855,"Telgomol"],
+  [2025,9,17,627663,"Welter"],
+  [2025,9,11,1960711,"Probattery"],[2025,9,26,1960711,"Probattery"],
+  [2025,9,22,1157187,"T.R.V"],[2025,10,6,1157187,"T.R.V"],[2025,10,21,1157187,"T.R.V"],
+  [2025,9,16,373965,"A.M.P baterias"],[2025,10,1,373965,"A.M.P baterias"],
+  [2025,10,8,785421,"Telgomol"],
+  [2025,8,20,91204,"Ausili"],
+  [2025,10,31,1828613,"Mecanizados san miguel"],[2025,11,30,1828613,"Mecanizados san miguel"],
+  [2025,10,5,293485,"International chemistry"],
+  [2025,9,22,217800,"Menapace"],
+  [2025,9,17,300452,"Embalacor"],
+  [2025,10,4,2170000,"Ventanas DT"],[2025,10,4,380035,"Rancagua"],
+  [2025,9,4,171494,"Marco Aurelio Sosa"],
+  [2025,9,25,1497596,"Carpack"],[2025,9,26,489140,"Carpack"],
+  [2025,9,27,6662090,"Caram"],[2025,10,10,6662090,"Caram"],[2025,10,26,6662090,"Caram"],[2025,11,9,6662090,"Caram"],[2025,11,26,6662090,"Caram"],
+  [2025,10,5,359487,"Tapihouse"],[2025,10,30,853596,"Tapihouse"],
+  [2025,10,16,835400,"Nelson pinturas"],
+  [2025,10,16,3563851,"Experto"],[2025,10,30,3563851,"Experto"],[2025,11,2,3563851,"Experto"],[2025,11,16,3563851,"Experto"],[2025,12,2,3563851,"Experto"],[2025,12,16,3563851,"Experto"],
+  [2025,10,17,3799900,"Flujomar"],
+  [2025,10,10,2400000,"Cáceres ferretería"],
+  [2025,10,10,2000000,"Patas camper"],
+  [2025,12,19,505167,"Dintra"],[2026,1,4,505167,"Dintra"],
+  [2025,12,20,603163,"Policor"],[2025,12,26,339165,"Policor"],
+  [2025,11,30,202307,"Embalacor"],
+  [2025,12,29,2221227,"Rusmar"],
+  [2025,11,30,2172929,"Richetta"],[2025,12,29,2172929,"Richetta"],[2026,1,29,2172929,"Richetta"],
+  [2025,12,12,284397,"Sbacco"],[2025,12,27,284397,"Sbacco"],
+  [2025,12,12,1334977,"Malkoni"],[2025,12,27,1334977,"Malkoni"],
+  [2025,12,12,449636,"Menapace"],
+  [2025,12,28,2370000,"Ventanas DT"],
+  [2025,12,11,2278732,"Wurth"],[2025,12,18,2278732,"Wurth"],
+  [2025,12,11,2142810,"Toldos argentina"],[2026,1,5,2142810,"Toldos argentina"],
+  [2025,12,20,1690702,"Grupo AG"],
+  [2025,12,11,5290000,"Cattaneo"],[2026,1,9,5290000,"Cattaneo"],[2026,2,9,840000,"Cattaneo"],[2026,3,9,840000,"Cattaneo"],
+  [2026,1,15,909468,"Embalacor"],
+  [2025,12,19,2782147,"Experto"],[2025,12,27,2782147,"Experto"],[2026,1,11,2782147,"Experto"],[2026,1,26,2782147,"Experto"],[2026,2,10,2782147,"Experto"],[2026,2,25,2782147,"Experto"],
+  [2026,1,11,2566854,"Wurth"],[2026,1,26,2566854,"Wurth"],
+  [2025,12,23,1870919,"Tecnoair"],
+  [2025,12,20,8230891,"Caram"],[2026,1,18,8230891,"Caram"],[2026,1,28,8230891,"Caram"],
+  [2025,12,20,2966239,"Nelson pinturas"],
+  [2026,1,30,541807,"Hura SA"],[2026,1,3,3548337,"Hura SA"],
+  [2026,1,18,935935,"Telgomol"],
+  [2026,1,18,1185855,"Tapihouse"],
+  [2026,1,19,761645,"Malkoni"],
+  [2026,1,20,426727,"Marcos Veglia"],[2026,2,13,426727,"Marcos Veglia"],
+  [2026,1,30,541807,"Hura SA"],
+  [2026,1,22,1506420,"Carpack"],
+  [2026,2,8,4428384,"T.R.V"],[2026,3,8,4428384,"T.R.V"],
+  [2026,1,10,966550,"Caram"],
+  [2026,1,10,1120000,"Cattaneo"],[2026,1,19,1120000,"Cattaneo"],[2026,2,19,1120000,"Cattaneo"],
+  [2026,1,29,131954,"Resinfibras"],
+  [2026,1,18,1325295,"Rhino"],[2026,2,18,1325295,"Rhino"],
+  [2026,1,28,128845,"Apromax"],
+  [2026,1,19,2000000,"Cáceres ferretería"],
+  [2026,2,13,1254006,"Todo Fer"],[2026,2,27,1254006,"Todo Fer"],
+  [2026,2,13,433285,"Siccba"],[2026,2,13,433285,"Siccba"],
+  [2026,1,15,783064,"Carpack"],
+  [2026,2,15,1500000,"Dintra"],[2026,2,25,1000000,"Dintra"],
+  [2026,2,7,4038939,"Marco Aurelio Sosa"],[2026,3,7,4038939,"Marco Aurelio Sosa"],[2026,4,7,4038939,"Marco Aurelio Sosa"],[2026,5,7,4038939,"Marco Aurelio Sosa"],
+  [2026,1,16,3414754,"Experto"],[2026,1,24,3414754,"Experto"],[2026,2,9,3414754,"Experto"],[2026,2,23,3414754,"Experto"],[2026,3,10,3414754,"Experto"],[2026,3,25,3414754,"Experto"],
+  [2026,1,14,5091816,"Caram"],[2026,2,14,5091816,"Caram"],
+  [2026,1,22,1035000,"Mauro Trovato"],
+  [2026,3,1,1609918,"Rancagua"],
+  [2026,1,31,820000,"Brio"],
+  [2026,2,8,3186961,"Nelson pinturas"],
+  [2025,2,13,434877,"Tapihouse"],
+  [2026,2,20,4422286,"Richetta"],[2026,3,20,4422286,"Richetta"],
+  [2026,2,20,696339,"T.R.V"],
+  // entradas nuevas detectadas
+  [2026,2,18,632752,"Soldmant"],
+  [2026,2,12,733002,"Grupo AG"],
+  [2026,2,4,1755591,"Ausili"],[2026,2,19,1755591,"Ausili"],
+  [2026,2,21,986339,"Textiles del suquía"],[2026,3,6,986339,"Textiles del suquía"],
+  [2026,2,5,3984790,"Flujomar"],
+  [2026,2,10,1049006,"Resinfibras"],
+  [2026,2,10,180113,"Ipipsa"],
+  [2026,2,27,548296,"Marmoles colon"],[2026,1,27,558296,"Marmoles colon"],[2026,2,11,558296,"Marmoles colon"],[2026,2,27,558296,"Marmoles colon"],[2026,3,16,558296,"Marmoles colon"],[2026,3,27,558296,"Marmoles colon"],
+  [2026,2,23,1376640,"Tapihouse"],
+  [2026,2,28,341188,"Embalacor"],
+  [2026,2,13,425369,"Ausili"],[2026,2,28,425369,"Ausili"],
+  [2026,2,6,3306541,"Experto"],[2026,2,13,3306541,"Experto"],[2026,2,28,3306541,"Experto"],[2026,3,15,3306541,"Experto"],[2026,3,30,3306541,"Experto"],
+  [2026,2,28,3292841,"Marco Aurelio Sosa"],[2026,3,28,3292841,"Marco Aurelio Sosa"],[2026,4,28,3292841,"Marco Aurelio Sosa"],[2026,5,28,3292841,"Marco Aurelio Sosa"],
+  [2026,2,7,840000,"Cattaneo"],[2026,3,7,840000,"Cattaneo"],[2026,4,7,840000,"Cattaneo"],[2026,5,7,840000,"Cattaneo"],
+  [2026,2,14,4493432,"Costanera uno"],
+  [2026,3,5,2501184,"Toldos argentina"],
+  [2026,3,5,350000,"Todo Fer"],
+  [2026,3,5,808765,"Telgomol"],
+  [2026,2,7,2401486,"T.R.V"],[2026,3,5,2401486,"T.R.V"],[2026,4,5,2401486,"T.R.V"],
+  [2026,4,5,2068900,"Fag sistems"],
+  [2026,4,5,4309049,"Caram"],
+  [2026,2,19,3699000,"Caram"],[2026,3,6,3699000,"Caram"],[2026,3,27,3699000,"Caram"],[2026,4,5,3699000,"Caram"],
+  [2026,2,14,1238670,"Carpack"],
+  [2026,3,11,673553,"Textiles del suquía"],[2026,3,26,673553,"Textiles del suquía"],
+  [2026,3,1,179275,"Resinfibras"],
+  [2026,3,1,98062,"Ipipsa"],
+  [2026,3,8,853472,"Tapihouse"],
+  [2026,2,14,840000,"Cattaneo"],[2026,3,13,840000,"Cattaneo"],[2026,4,13,840000,"Cattaneo"],[2026,5,13,840000,"Cattaneo"],
+  [2026,2,27,960014,"Wurth"],[2026,3,16,960014,"Wurth"],
+  [2026,2,26,1185000,"Ventanas DT"],[2026,3,10,1185000,"Ventanas DT"],
+  [2026,2,26,840000,"Cattaneo"],[2026,3,20,840000,"Cattaneo"],[2026,4,20,840000,"Cattaneo"],[2026,5,20,840000,"Cattaneo"],
+  [2026,2,26,694500,"Mauro Trovato"],[2026,3,14,694501,"Mauro Trovato"],
+  [2026,3,18,2587286,"Toldos argentina"],
+  [2026,3,4,2685908,"Wurth"],[2026,3,19,2685908,"Wurth"],
+  [2026,2,26,5059494,"Alpros"],[2026,3,5,5059494,"Alpros"],
+  [2026,3,24,4555342,"Marco Aurelio Sosa"],[2026,4,24,4555342,"Marco Aurelio Sosa"],[2026,5,24,4555342,"Marco Aurelio Sosa"],[2026,6,24,4555342,"Marco Aurelio Sosa"],
+  [2026,2,26,5088426,"Experto"],[2026,3,9,5088426,"Experto"],[2026,3,24,5088426,"Experto"],[2026,4,8,5088426,"Experto"],[2026,4,23,5088426,"Experto"],
+  [2026,3,31,575600,"Todo Fer"],
+  [2026,3,23,1463279,"Nelson pinturas"],
+  [2026,3,20,819251,"Textiles del suquía"],[2026,4,7,819251,"Textiles del suquía"],
+  [2026,3,21,1266890,"Rancagua"],[2026,4,8,1266890,"Rancagua"],
+  [2026,3,24,2261633,"Caram"],[2026,4,15,2261633,"Caram"],
+  [2026,3,21,2223377,"Proyectando"],[2026,4,13,2223377,"Proyectando"],
+  [2026,2,26,199864,"Servitac"],
+  [2026,3,12,1103118,"Tapihouse"],
+  [2026,3,16,1318094,"Welter"],
+  [2026,2,26,808674,"Mesadas"],
+  [2026,3,14,750000,"Miguel Angel Mercadal"],
+  [2026,3,14,750000,"Mauro Trovato"],
+  [2026,3,4,264500,"Revcon"],[2026,3,19,264500,"Revcon"],
+  [2026,4,11,2507812,"Miguel Angel Papa"],
+  [2026,4,8,874013,"Mecanizados san miguel"],[2026,4,23,874013,"Mecanizados san miguel"],[2026,5,8,874013,"Mecanizados san miguel"],
+  [2026,4,9,4438092,"Caram"],[2026,4,18,4438092,"Caram"],
+  [2026,4,11,2100000,"Dintra"],
+  [2026,4,2,656470,"Tapihouse"],
+  [2026,3,12,1564032,"Livin house"],
+  [2026,3,15,500000,"Rancagua"],
+  [2026,3,30,941326,"Resinfibras"],[2026,3,30,93386,"Ipipsa"],
+  [2026,4,19,3091095,"Richetta"],
+  [2026,4,18,540,"Telgomol"],
+  [2026,3,19,2559589,"Legitel"],
+  [2026,4,1,359215,"Embalacor"],
+  [2026,3,22,1666187,"Wurth"],[2026,4,6,1666187,"Wurth"],
+  [2026,4,16,1525652,"Rusmar"],[2026,4,30,1525653,"Rusmar"],[2026,5,15,1525654,"Rusmar"],
+  [2026,3,19,370848,"Siccba"],[2026,4,1,370848,"Siccba"],[2026,4,17,146132,"Siccba"],[2026,5,1,146133,"Siccba"],[2026,5,16,146134,"Siccba"],
+  [2026,3,19,887500,"Cattaneo"],[2026,4,17,2347500,"Cattaneo"],[2026,5,17,887500,"Cattaneo"],[2026,6,17,887500,"Cattaneo"],
+  [2026,3,20,1408492,"Carpack"],
+  [2026,4,11,3309040,"T.R.V"],[2026,4,26,3309040,"T.R.V"],[2026,5,16,3309040,"T.R.V"],
+  [2026,4,17,629271,"Herracenter"],
+  [2026,3,21,671500,"Mauro Trovato"],[2026,4,1,671500,"Mauro Trovato"],
+  [2026,4,16,762148,"Todo Fer"],[2026,5,1,762148,"Todo Fer"],
+  [2026,4,18,2824714,"Caram"],[2026,5,1,2824714,"Caram"],
+  [2026,4,18,161370,"Mecanizados san miguel"],
+  [2026,4,18,1408684,"Toldos argentina"],
+  [2026,4,10,1141910,"Tapihouse"],
+  [2026,4,8,1531258,"Cáceres ferretería"],
+  [2026,4,12,2637402,"Wurth"],[2026,4,27,2637402,"Wurth"],
+  [2026,4,18,560271,"Nelson pinturas"],
+  [2026,4,18,2017623,"Caram"],[2026,5,3,2017623,"Caram"],
+  [2026,4,8,3890669,"Experto"],[2026,4,11,3890669,"Experto"],[2026,4,26,3890669,"Experto"],[2026,5,11,3890669,"Experto"],[2026,5,25,3890669,"Experto"],[2026,6,9,3890669,"Experto"],
+  [2026,5,1,2277333,"Cattaneo"],[2026,6,1,2233333,"Cattaneo"],[2026,7,1,2233333,"Cattaneo"],
+  [2026,4,8,966600,"Af distribuidora"],
+  [2026,4,8,156473,"Alpros"],
+  [2026,5,1,764843,"Textiles del suquía"],[2026,5,15,764843,"Textiles del suquía"],
+  [2026,5,1,414642,"Distribuidora AG"],
+  [2026,4,25,319440,"Mecanizados san miguel"],
+  [2026,5,1,550000,"Todo Fer"],
+  [2026,4,8,871500,"Perfeccto ventures"],
+  [2026,5,6,3792357,"Caram"],[2026,5,21,3792357,"Caram"],
+  [2026,5,29,1187070,"Motegoma"],
+  [2026,5,9,2564247,"Caram"],[2026,5,24,2564247,"Caram"],
+  [2026,5,29,1500000,"Todo Fer"],
+  [2026,5,29,1600000,"Rancagua"],
+  [2026,5,10,1770457,"Ausili"],
+  [2026,5,14,2081293,"T.R.V"],[2026,5,30,2081293,"T.R.V"],[2026,6,9,2081293,"T.R.V"],
+  [2026,5,3,10828714,"Lambda"],
+  [2026,5,3,723211,"Industrias sur"],
+  [2026,6,5,244943,"Embalacor"],
+  [2026,5,1,1410133,"Carpack"],
+  [2026,5,20,1893256,"Wurth"],[2026,6,5,1893256,"Wurth"],
+  [2026,5,17,1405638,"Tapihouse"],
+  [2026,5,7,750000,"Mauro Trovato"],[2026,5,15,750000,"Mauro Trovato"],
+  [2026,5,22,635642,"Marco Aurelio Sosa"],[2026,6,22,635642,"Marco Aurelio Sosa"],
+  [2026,5,29,3518260,"Richetta"],
+  [2026,5,13,633723,"Malkoni"],
+  [2026,5,19,951968,"Nelson pinturas"],
+  [2026,5,10,4981267,"Esimex"],
+  [2026,5,15,887190,"Cáceres ferretería"],
+  // entradas que antes estaban en "por girar", ahora pasaron a historial
+  [2026,6,22,1475825,"Caram"],
+  [2026,6,11,512700,"Cattaneo"],
+  [2026,6,12,629854,"Fag sistems"],[2026,7,12,629854,"Fag sistems"],[2026,8,12,629855,"Fag sistems"],
+  [2026,6,11,3377676,"Caram"],[2026,7,11,3377676,"Caram"],
+  [2026,6,6,1264600,"Avin ice"],
+  [2026,6,15,1700000,"Dintra"],
+  [2026,6,8,3229786,"Rusmar"],[2026,7,8,3229786,"Rusmar"],
+  [2026,6,7,1198516,"Tapihouse"],
+  [2026,6,12,1335181,"Proyectando"],[2026,7,12,1335181,"Proyectando"],
+  [2026,6,17,1700000,"Rancagua"],
+  [2026,6,14,1527868,"Nelson pinturas"],
+  [2026,6,19,1201071,"Alfaser"],
+  [2026,6,17,1001066,"Telgomol"],
+  [2026,6,16,1000000,"Cáceres ferretería"],
+  [2026,6,19,694001,"Textiles del suquía"],[2026,7,4,694001,"Textiles del suquía"],
+  [2026,6,15,1330800,"Avin ice"],
+  [2026,6,8,307798,"Ipipsa"],
+  [2026,6,8,793946,"Resinfibras"],
+  [2026,6,6,1840202,"Marco Aurelio Sosa"],[2026,7,6,1840202,"Marco Aurelio Sosa"],
+  [2026,6,25,2575485,"Caram"],[2026,7,11,2575485,"Caram"],
+  [2026,6,22,362531,"Malkoni"],
+  [2026,6,25,784219,"Marco Aurelio Sosa"],[2026,7,10,784219,"Marco Aurelio Sosa"],[2026,7,25,784220,"Marco Aurelio Sosa"],
+  // últimos agregados
+  [2026,5,30,2111014,"Experto"],[2026,6,18,2111014,"Experto"],[2026,7,2,2111014,"Experto"],
+  [2026,6,20,1815000,"Mercedes Benz"],[2026,7,20,1815000,"Mercedes Benz"],
+  [2026,6,27,1397000,"Cáceres ferretería"],
+  [2026,6,29,2815776,"Richetta"],[2026,7,29,2815776,"Richetta"],[2026,8,14,2815776,"Richetta"]
+];
+
+const TRANSFERS = [
+  // 30/4/2026
+  [2026,4,30,2289320,"Dismaxi"],[2026,4,30,272250,"Lonas Bedran"],[2026,4,30,77000,"Bordados"],
+  [2026,4,30,285000,"Rhino"],[2026,4,30,1000000,"Peralta goma"],[2026,4,30,477300,"MDQ"],
+  [2026,4,30,552406,"Revegler"],[2026,4,30,660000,"Bayma"],[2026,4,30,314172,"Race sport"],
+  [2026,4,30,48000,"Compufix"],[2026,4,30,1923940,"ASIA"],[2026,4,30,254577,"Gema"],
+  [2026,4,30,65246,"Embalacor"],[2026,4,30,147606,"Autodo"],[2026,4,30,540000,"Distribuidora de gas"],
+  [2026,4,30,1264600,"Avin ice"],
+  // 18/5/2026
+  [2026,5,18,234800,"Genesis"],[2026,5,18,195300,"Parcamp"],[2026,5,18,1401837,"G.deco"],
+  [2026,5,18,550000,"Thinner"],[2026,5,18,234000,"Guayaibi"],[2026,5,18,1825436,"Legitel"],
+  [2026,5,18,891000,"Mesadas"],[2026,5,18,306799,"Ipipsa"],[2026,5,18,793946,"Resinfibras"],
+  // 10/6/2026 (NUEVAS)
+  [2026,6,10,47382,"Rancagua"],
+  [2026,6,10,158400,"Sbacco"],
+  [2026,6,10,146500,"Espejos"],
+  [2026,6,10,875760,"Probattery"],
+  [2026,6,10,654000,"Enertikk"],
+  [2026,6,10,440000,"Bayma"],
+  [2026,6,10,124000,"Elasticos"]
+];
+
+// "Cheques por girar" — actualizado 14/07/2026 desde Google Sheets (fecha = "Fecha de pago" prevista)
+const POR_GIRAR = [
+  [2026,7,13,4543838,"Wurth"],
+  [2026,7,30,1297700,"Avin ice"],
+  [2026,7,13,369332,"Siccba"],[2026,7,28,369332,"Siccba"],[2026,8,13,369332,"Siccba"],
+  [2026,7,27,1305210,"Flujomar"],
+  [2026,7,15,1157594,"Carpack"],
+  [2026,7,22,1200000,"Todo Fer"],
+  [2026,7,18,565640,"Tapihouse"],
+  [2026,7,8,319200,"Af distribuidora"],[2026,7,23,319200,"Af distribuidora"],
+  [2026,7,10,1762075,"Caram"],[2026,7,25,1762075,"Caram"],[2026,8,10,1762075,"Caram"],[2026,8,25,1762074,"Caram"],[2026,9,10,1762074,"Caram"],
+  [2026,8,10,1440000,"Cattaneo"],[2026,9,10,1440000,"Cattaneo"],[2026,10,10,1440000,"Cattaneo"],
+  [2026,7,24,1304623,"Nelson pinturas"],
+  [2026,8,7,1200000,"Rancagua"],
+  [2026,8,7,534426,"Ausili"],
+  [2026,8,15,1426449,"Richetta"],[2026,8,15,1426450,"Richetta"],
+  [2026,7,10,327129,"Hissuma"],[2026,7,25,327129,"Hissuma"],[2026,8,10,327128,"Hissuma"],[2026,8,25,327128,"Hissuma"],
+  [2026,7,24,831916,"Cáceres ferretería"],[2026,8,11,831916,"Cáceres ferretería"],
+  [2026,8,3,715413,"Dismaxi"],
+  [2026,8,7,794224,"Proyectando"],
+  [2026,8,9,1046758,"Tapihouse"],
+  [2026,7,15,473000,"Toldos argentina"],
+  [2026,8,10,826464,"Embalacor"],
+  [2026,8,4,967115,"Resinfibras"],
+  [2026,8,4,335350,"Ipipsa"],
+  [2026,8,15,1000000,"Dintra"],[2026,8,15,1200000,"Dintra"],
+  [2026,7,16,2561993,"Experto"],[2026,7,31,2561993,"Experto"],[2026,8,15,2561993,"Experto"],[2026,8,30,2561993,"Experto"],[2026,9,14,2561993,"Experto"],
+  [2026,9,29,2561993,"Experto"] // corregido: seguía la cadencia de 15 días desde Experto-60 (14/09 + 15 = 29/09)
+];
+
+// "Transferencias por girar" — nueva, desde Google Sheets (fecha = "Fecha")
+const TRANSFERS_POR_GIRAR = [
+  [2026,7,15,100000,"Chapista"],
+  [2026,7,16,900000,"Chapista"],
+  [2026,7,17,1035495,"Asia"],
+  [2026,7,18,293329,"CNC Router"],
+  [2026,7,19,253900,"Genesis vidrios"],
+  [2026,7,20,665217.34,"La Rocca Juan Martin"],
+  [2026,7,21,22000,"Cattaneo"],
+  [2026,7,22,816750,"Legitel"],
+  [2026,7,23,272250,"Lonas Bedran"],
+  [2026,7,24,95000,"Compufix"],
+  [2026,7,25,216000,"Lersdeco"],
+  [2026,7,26,145200,"Cugat"],
+  [2026,7,27,102000,"Lagos Hermanos"],
+  [2026,7,28,967115,"Resinfibras"],
+  [2026,7,29,335350,"Ipipsa"],
+  [2026,7,30,58538.39,"Brio"]
+];
+
+// "Efectivo por pagar" — nueva, desde Google Sheets. DM oleohidraulica está en USD, no se suma al total ARS.
+const EFECTIVO_POR_GIRAR = [
+  [2026,7,15,2410000,"Toldos argentina"]
+];
+const EFECTIVO_POR_GIRAR_USD = [
+  [2026,7,15,4400,"DM oleohidraulica"]
+];
+
+// "Deudas" — saldos por proveedor (planilla "Deudas"), sin fecha por fila; se muestra aparte del gráfico mensual
+const DEUDAS = [
+  {proveedor:"Neil", metodo:"efectivo", monto:9494556},
+  {proveedor:"Wurth", metodo:"echeq", monto:4543838},
+  {proveedor:"Genesis vidrios", metodo:"transferencia", monto:253900},
+  {proveedor:"Chapista", metodo:"transferencia", monto:1000000}
+];
+
+const CURRENT_YEAR = 2026, CURRENT_MONTH = 7;
+const MONTH_NAMES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const MONTH_SHORT = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+const COLOR_ECH = "#FB8C00", COLOR_TR = "#FBC02D", COLOR_PG = "#8E24AA", COLOR_TRPG = "#00897B", COLOR_EFPG = "#3949AB", GREY = "#E0E0E0";
+
+function fmtARS(n){ return "$" + Math.round(n).toLocaleString("es-AR"); }
+function fmtMill(n){ if(!n) return "—"; const m=n/1e6; if(m>=10) return "$ "+m.toFixed(0)+" mill."; if(m>=1) return "$ "+m.toFixed(2).replace(".",",")+" mill."; return "$ "+(n/1000).toFixed(0)+"k"; }
+function fmtMillShort(n){ if(!n) return "—"; const m=n/1e6; if(m>=10) return "$"+m.toFixed(0)+"M"; if(m>=1) return "$"+m.toFixed(1)+"M"; return "$"+(n/1000).toFixed(0)+"k"; }
+
+let selectedYear = "2026";
+let selectedMonths = new Set([1,2,3,4,5,6,7,8,9,10,11,12]);
+
+function passesYear(y){ return selectedYear==="todos" || y===parseInt(selectedYear,10); }
+function passesMonth(m){ return selectedMonths.has(m); }
+
+function totalsByMonth(){
+  const out={}; for(let m=1;m<=12;m++) out[m]={ech:0,tr:0,pg:0,trpg:0,efpg:0};
+  ECHEQS.forEach(r=>{ if(passesYear(r[0])) out[r[1]].ech+=r[3]; });
+  TRANSFERS.forEach(r=>{ if(passesYear(r[0])) out[r[1]].tr+=r[3]; });
+  POR_GIRAR.forEach(r=>{ if(passesYear(r[0])) out[r[1]].pg+=r[3]; });
+  TRANSFERS_POR_GIRAR.forEach(r=>{ if(passesYear(r[0])) out[r[1]].trpg+=r[3]; });
+  EFECTIVO_POR_GIRAR.forEach(r=>{ if(passesYear(r[0])) out[r[1]].efpg+=r[3]; });
+  return out;
+}
+
+function providerTotals(){
+  const t={};
+  [ECHEQS,TRANSFERS,POR_GIRAR,TRANSFERS_POR_GIRAR,EFECTIVO_POR_GIRAR].forEach(arr=>arr.forEach(r=>{
+    if(passesYear(r[0]) && passesMonth(r[1])) t[r[4]] = (t[r[4]]||0)+r[3];
+  }));
+  return t;
+}
+
+function renderMonthList(){
+  document.getElementById("monthList").innerHTML = MONTH_NAMES.map((name,i)=>{
+    const m=i+1, on=selectedMonths.has(m), nowCls=m===CURRENT_MONTH?"now":"";
+    return `<button class="mbtn ${on?"on":""} ${nowCls}" data-m="${m}"><span class="chk">${on?"✓":""}</span>${name}</button>`;
+  }).join("");
+  document.querySelectorAll(".mbtn").forEach(btn=>btn.addEventListener("click",()=>{
+    const m=+btn.dataset.m;
+    if(selectedMonths.has(m)) selectedMonths.delete(m); else selectedMonths.add(m);
+    rerender();
+  }));
+}
+
+function renderKpis(){
+  let ech=0, tr=0, pg=0, trpg=0, efpg=0, mesTot=0;
+  ECHEQS.forEach(r=>{ if(passesYear(r[0])&&passesMonth(r[1])){ ech+=r[3]; if(r[1]===CURRENT_MONTH && r[0]===CURRENT_YEAR) mesTot+=r[3]; } });
+  TRANSFERS.forEach(r=>{ if(passesYear(r[0])&&passesMonth(r[1])){ tr+=r[3]; if(r[1]===CURRENT_MONTH && r[0]===CURRENT_YEAR) mesTot+=r[3]; } });
+  POR_GIRAR.forEach(r=>{ if(passesYear(r[0])&&passesMonth(r[1])){ pg+=r[3]; if(r[1]===CURRENT_MONTH && r[0]===CURRENT_YEAR) mesTot+=r[3]; } });
+  TRANSFERS_POR_GIRAR.forEach(r=>{ if(passesYear(r[0])&&passesMonth(r[1])){ trpg+=r[3]; if(r[1]===CURRENT_MONTH && r[0]===CURRENT_YEAR) mesTot+=r[3]; } });
+  EFECTIVO_POR_GIRAR.forEach(r=>{ if(passesYear(r[0])&&passesMonth(r[1])){ efpg+=r[3]; if(r[1]===CURRENT_MONTH && r[0]===CURRENT_YEAR) mesTot+=r[3]; } });
+  const totPorGirar = pg+trpg+efpg;
+  const cards = [
+    {lbl:"Total Echeqs", val:fmtMill(ech), sub:"historial de cheques", cls:"ech"},
+    {lbl:"Total Transferencias", val:fmtMill(tr), sub:"ya realizadas", cls:"tr"},
+    {lbl:"Cheques por girar", val:fmtMill(pg), sub:"pendientes de emitir", cls:"pg"},
+    {lbl:"Transferencias por girar", val:fmtMill(trpg), sub:"pendientes de hacer", cls:"trpg"},
+    {lbl:"Efectivo por girar", val:fmtMill(efpg), sub:"+ U$D 4.400 (DM oleohidr.)", cls:"efpg"},
+    {lbl:"Julio (mes actual)", val:fmtMill(mesTot), sub:"todas las categorías", cls:"total"},
+    {lbl:"Total a desembolsar", val:fmtMill(totPorGirar), sub:"cheques + transf. + efectivo por girar", cls:"total"}
+  ];
+  document.getElementById("kpis").innerHTML = cards.map(c=>`<div class="kpi ${c.cls}"><div class="lbl">${c.lbl}</div><div class="val">${c.val}</div><div class="sub">${c.sub}</div></div>`).join("");
+}
+
+let chartTotal;
+function renderChart(){
+  const d = totalsByMonth();
+  const labels = MONTH_NAMES;
+  const ech = labels.map((_,i)=>d[i+1].ech);
+  const tr = labels.map((_,i)=>d[i+1].tr);
+  const pg = labels.map((_,i)=>d[i+1].pg);
+  const trpg = labels.map((_,i)=>d[i+1].trpg);
+  const efpg = labels.map((_,i)=>d[i+1].efpg);
+  const dim = (c,i)=>passesMonth(i+1)?c:GREY;
+  const datasets = [
+    {label:"Echeqs", data:ech, backgroundColor:labels.map((_,i)=>dim(COLOR_ECH,i)), borderColor:"#E65100", borderWidth:0.5, stack:"s"},
+    {label:"Transferencias", data:tr, backgroundColor:labels.map((_,i)=>dim(COLOR_TR,i)), borderColor:"#F57F17", borderWidth:0.5, stack:"s"},
+    {label:"Cheques por girar", data:pg, backgroundColor:labels.map((_,i)=>dim(COLOR_PG,i)), borderColor:"#4A148C", borderWidth:0.5, stack:"s"},
+    {label:"Transferencias por girar", data:trpg, backgroundColor:labels.map((_,i)=>dim(COLOR_TRPG,i)), borderColor:"#004D40", borderWidth:0.5, stack:"s"},
+    {label:"Efectivo por girar", data:efpg, backgroundColor:labels.map((_,i)=>dim(COLOR_EFPG,i)), borderColor:"#1A237E", borderWidth:0.5, stack:"s"}
+  ];
+
+  const ctx = document.getElementById("chartTotal").getContext("2d");
+  if(chartTotal) chartTotal.destroy();
+  chartTotal = new Chart(ctx, {
+    type:"bar",
+    data:{labels, datasets},
+    options:{
+      responsive:true, maintainAspectRatio:false, interaction:{mode:"index",intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          callbacks:{
+            title:(it)=>it[0].label + (it[0].label==="Julio"?"  ← MES ACTUAL":""),
+            label:(c)=>c.dataset.label+": "+fmtARS(c.parsed.y),
+            footer:(it)=>"Total mes: "+fmtARS(it.reduce((s,i)=>s+i.parsed.y,0))
+          }
+        }
+      },
+      scales:{
+        x:{
+          stacked:true,
+          ticks:{
+            color:(ctx)=>ctx.index===6?"#E65100":"#444",
+            font:(ctx)=>({size:12, weight:ctx.index===6?700:500})
+          },
+          grid:{display:false}
+        },
+        y:{
+          stacked:true, beginAtZero:true,
+          ticks:{color:"#777", callback:(v)=>"$"+(v/1e6).toFixed(0)+"M", font:{size:11}},
+          grid:{color:"rgba(0,0,0,0.05)"}
+        }
+      },
+      animation:{duration:400}
+    },
+    plugins:[{
+      id:"totalLabels",
+      afterDatasetsDraw(chart){
+        const {ctx, scales:{y}} = chart;
+        ctx.save();
+        ctx.font = "700 11px -apple-system, Segoe UI";
+        ctx.textAlign = "center";
+        chart.data.labels.forEach((_,i)=>{
+          const tot = chart.data.datasets.reduce((s,ds)=>s+(ds.data[i]||0),0);
+          if(!tot) return;
+          const xPx = chart.getDatasetMeta(0).data[i].x;
+          const yPx = y.getPixelForValue(tot);
+          ctx.fillStyle = i===6 ? "#E65100" : "#333";
+          ctx.fillText(fmtMillShort(tot), xPx, yPx - 6);
+        });
+        ctx.restore();
+      }
+    }]
+  });
+}
+
+function renderTopList(){
+  const tots = providerTotals();
+  const sorted = Object.entries(tots).sort((a,b)=>b[1]-a[1]).slice(0,15);
+  const max = sorted.length > 0 ? sorted[0][1] : 1;
+  document.getElementById("topList").innerHTML = sorted.length === 0
+    ? '<div style="padding:20px;color:#888;text-align:center;">Sin datos para los meses seleccionados</div>'
+    : sorted.map(([p,v],i)=>{
+        const pct = (v/max*100).toFixed(0);
+        const cls = i===0 ? "gold" : i===1 ? "silver" : i===2 ? "bronze" : "";
+        return `<div class="top-item ${cls}">
+          <div class="rank">#${i+1}</div>
+          <div class="data">
+            <div class="row1"><span class="pname">${p}</span><span class="pamt">${fmtMill(v)}</span></div>
+            <div class="bar" style="width:${pct}%"></div>
+          </div>
+        </div>`;
+      }).join("");
+  const monthCount = selectedMonths.size;
+  const yearTxt = selectedYear==="todos" ? "" : " · año "+selectedYear;
+  document.getElementById("topInfo").textContent = `Top 15 · ${monthCount} mes${monthCount===1?"":"es"} seleccionado${monthCount===1?"":"s"}${yearTxt}`;
+}
+
+function renderDeudas(){
+  const total = DEUDAS.reduce((s,d)=>s+d.monto,0);
+  const rows = DEUDAS.map(d=>`<tr>
+      <td>${d.proveedor}<span class="method-tag ${d.metodo}">${d.metodo}</span></td>
+      <td class="amt">${fmtARS(d.monto)}</td>
+    </tr>`).join("");
+  document.getElementById("deudasTable").innerHTML = `
+    <thead><tr><th>Proveedor</th><th style="text-align:right">Monto adeudado</th></tr></thead>
+    <tbody>
+      ${rows}
+      <tr class="totrow"><td>Total deudas</td><td class="amt">${fmtARS(total)}</td></tr>
+    </tbody>`;
+}
+
+function updateSubtitle(){
+  const sel = [...selectedMonths].sort((a,b)=>a-b);
+  let mtxt;
+  if(sel.length===12) mtxt = "todos los meses";
+  else if(sel.length===0) mtxt = "(ningún mes seleccionado)";
+  else if(sel.length===1) mtxt = MONTH_NAMES[sel[0]-1];
+  else mtxt = sel.map(m=>MONTH_SHORT[m-1]).join(", ");
+  document.getElementById("subtitle").textContent =
+    `Mostrando: ${mtxt} · año ${selectedYear==="todos"?"completo":selectedYear} · echeqs + transferencias (pagados) + cheques/transferencias/efectivo por girar (a pagar, según fecha de pago prevista)`;
+  document.getElementById("footerNote").innerHTML =
+    `Datos sincronizados desde Google Drive · planilla "Historial de pagos" (pestañas Historial de cheques/transferencias/efectivo, Cheques por girar, Transferencias por girar, Efectivo por pagar, Deudas) · foto al 14/07/2026.<br>
+     Efectivo por girar incluye además U$D 4.400 de "DM oleohidraulica" (15/07/2026), no sumado al total en pesos.<br>
+     A revisar: Resinfibras ($967.115) e Ipipsa ($335.350) aparecen con el mismo monto en "Cheques por girar" y en "Transferencias por girar" — podría ser el mismo pago cargado dos veces.`;
+}
+
+function rerender(){
+  updateSubtitle();
+  renderMonthList();
+  renderKpis();
+  renderChart();
+  renderTopList();
+  renderDeudas();
+}
+
+document.getElementById("yearSel").addEventListener("change", e=>{ selectedYear=e.target.value; rerender(); });
+document.getElementById("btnAll").addEventListener("click", ()=>{ selectedMonths=new Set([1,2,3,4,5,6,7,8,9,10,11,12]); rerender(); });
+document.getElementById("btnNone").addEventListener("click", ()=>{ selectedMonths=new Set(); rerender(); });
+document.getElementById("btnNow").addEventListener("click", ()=>{ selectedMonths=new Set([CURRENT_MONTH]); rerender(); });
+document.getElementById("btnInv").addEventListener("click", ()=>{
+  const n=new Set();
+  for(let i=1;i<=12;i++) if(!selectedMonths.has(i)) n.add(i);
+  selectedMonths=n;
+  rerender();
+});
+
+rerender();
+</script>
+</body>
+</html>
