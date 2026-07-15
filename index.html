@@ -533,6 +533,7 @@ const DEUDAS = [
 
 // Modalidades "dinero físico": Efectivo y Depósito bancario — excluye echeqs y transferencias electrónicas
 const MODALIDADES_FISICAS = [
+  {proveedor:"Neil", metodo:"efectivo", monto:9494556, moneda:"ARS"},
   {proveedor:"DM oleohidraulica", metodo:"efectivo", monto:4400, moneda:"USD"},
   {proveedor:"Toldos argentina", metodo:"deposito", monto:2410000, moneda:"ARS"}
 ];
@@ -716,14 +717,15 @@ function renderModalidad(){
   const totalUSD = MODALIDADES_FISICAS.filter(d=>d.moneda==="USD").reduce((s,d)=>s+d.monto,0);
   const rows = MODALIDADES_FISICAS.map(d=>`<tr>
       <td>${d.proveedor}<span class="method-tag ${d.metodo}">${d.metodo==="deposito"?"depósito bancario":d.metodo}</span></td>
+      <td style="text-align:center;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:0.5px">${d.moneda}</td>
       <td class="amt">${d.moneda==="USD" ? "U$D "+d.monto.toLocaleString("es-AR") : fmtARS(d.monto)}</td>
     </tr>`).join("");
-  const totLabel = totalUSD ? `${fmtARS(totalARS)} + U$D ${totalUSD.toLocaleString("es-AR")}` : fmtARS(totalARS);
+  const totLabel = totalUSD ? `${fmtARS(totalARS)} ARS + U$D ${totalUSD.toLocaleString("es-AR")}` : `${fmtARS(totalARS)} ARS`;
   document.getElementById("modalidadTable").innerHTML = `
-    <thead><tr><th>Proveedor</th><th style="text-align:right">Monto</th></tr></thead>
+    <thead><tr><th>Proveedor</th><th style="text-align:center">Moneda</th><th style="text-align:right">Monto</th></tr></thead>
     <tbody>
       ${rows}
-      <tr class="totrow"><td>Total efectivo + depósitos</td><td class="amt">${totLabel}</td></tr>
+      <tr class="totrow"><td>Total efectivo + depósitos</td><td></td><td class="amt">${totLabel}</td></tr>
     </tbody>`;
 }
 
