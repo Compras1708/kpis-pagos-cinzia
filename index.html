@@ -12,7 +12,7 @@
 <title>KPIs Pagos · Echeqs, Transferencias y Por Girar</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
 <style>
-  :root { color-scheme: light; --ech:#FB8C00; --tr:#FBC02D; --pg:#8E24AA; --trpg:#00897B; --efpg:#3949AB; --deuda:#D32F2F; --ink:#1f1f1f; --muted:#666; --line:#e5e5e5; --bg:#fafafa; }
+  :root { color-scheme: light; --ech:#FB8C00; --tr:#FBC02D; --pg:#8E24AA; --trpg:#E53935; --efpg:#B71C1C; --deuda:#D32F2F; --ink:#1f1f1f; --muted:#666; --line:#e5e5e5; --bg:#fafafa; }
   * { box-sizing: border-box; }
   body { margin: 0; padding: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
   .wrap { max-width: 1400px; margin: 0 auto; padding: 28px 32px; }
@@ -94,10 +94,14 @@
   table.deudas-table tr.totrow td { border-top: 2px solid var(--ink); border-bottom: none; font-weight: 800; padding-top: 12px; }
   table.deudas-table tr.totrow td.amt { color: var(--ink); font-size: 15px; }
   .method-tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 999px; margin-left: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
-  .method-tag.efectivo { background: #FFF3E0; color: #E65100; }
+  .method-tag.efectivo { background: #FFEBEE; color: #B71C1C; }
   .method-tag.echeq { background: #FFF8E1; color: #F57F17; }
-  .method-tag.transferencia { background: #E0F2F1; color: #00695C; }
+  .method-tag.transferencia { background: #FFEBEE; color: #D32F2F; }
   .method-tag.deposito { background: #E3F2FD; color: #1565C0; }
+  table.deudas-table tr.urgent { background: #FFCDD2; }
+  table.deudas-table tr.urgent td.amt { color: #B71C1C; }
+  .urgent-badge { font-size: 11px; font-weight: 800; color: #B71C1C; }
+  .ok-badge { font-size: 11px; font-weight: 500; color: #999; }
 
   .footer-note { color: var(--muted); font-size: 12px; margin-top: 24px; text-align: center; padding: 12px; background: #fff; border-radius: 8px; border: 1px solid var(--line); line-height: 1.6; }
 </style>
@@ -138,14 +142,14 @@
 
     <div class="chartcard">
       <h2 id="chartTitle">Pagos por mes (fecha de pago prevista)</h2>
-      <div class="ssub">Naranja = echeqs (historial). Amarillo = transferencias (historial). Morado = cheques por girar. Verde = transferencias por girar. Índigo = efectivo por girar.</div>
+      <div class="ssub">Naranja = echeqs (historial). Amarillo = transferencias (historial). Morado = cheques por girar. Rojo = transferencias por girar. Rojo oscuro = efectivo por girar (destacados para marcar urgencia).</div>
       <div class="chart-wrap"><canvas id="chartTotal"></canvas></div>
       <div class="legendrow">
         <div class="it"><span class="swatch" style="background:#FB8C00"></span>Echeqs (historial)</div>
         <div class="it"><span class="swatch" style="background:#FBC02D"></span>Transferencias (historial)</div>
         <div class="it"><span class="swatch" style="background:#8E24AA"></span>Cheques por girar</div>
-        <div class="it"><span class="swatch" style="background:#00897B"></span>Transferencias por girar</div>
-        <div class="it"><span class="swatch" style="background:#3949AB"></span>Efectivo por girar</div>
+        <div class="it"><span class="swatch" style="background:#E53935"></span>Transferencias por girar</div>
+        <div class="it"><span class="swatch" style="background:#B71C1C"></span>Efectivo por girar</div>
       </div>
     </div>
   </div>
@@ -172,6 +176,14 @@
       <span class="dsub">Pagos pendientes por modalidad — solo dinero físico (efectivo) y depósitos bancarios, sin echeqs ni transferencias electrónicas</span>
     </header>
     <table class="deudas-table" id="modalidadTable"></table>
+  </div>
+
+  <div class="deudascard">
+    <header>
+      <h2>🚨 Urgencia — Transferencias y Efectivo por girar</h2>
+      <span class="dsub">Antigüedad del pedido de compra en Odoo ("Fecha límite de pedido"). Filas en rojo claro: más de 15 días — mayor urgencia de pago. "s/d" = proveedor sin pedido pendiente encontrado en Odoo con ese nombre</span>
+    </header>
+    <table class="deudas-table" id="urgenciaTable"></table>
   </div>
 
   <div class="footer-note" id="footerNote"></div>
@@ -538,10 +550,18 @@ const MODALIDADES_FISICAS = [
   {proveedor:"Toldos argentina", metodo:"deposito", monto:2410000, moneda:"ARS"}
 ];
 
+// Antigüedad del pedido en Odoo ("Fecha límite de pedido" = date_order), en días, al 29/07/2026.
+// Tomado del pedido pendiente ("to invoice") más antiguo por proveedor. Providers sin match no tienen pedido pendiente identificable en Odoo con ese nombre.
+const ODOO_ANTIGUEDAD = {
+  "Cattaneo":202, "Resinfibras":200, "Genesis vidrios":196, "Ipipsa":188, "Thinner":187,
+  "Neil":187, "DM oleohidraulica":183, "Toldos argentina":174, "Lonas Bedran":173,
+  "Cugat":166, "Legitel":154, "Asia":134, "Avin ice":102
+};
+
 const CURRENT_YEAR = 2026, CURRENT_MONTH = 7;
 const MONTH_NAMES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const MONTH_SHORT = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
-const COLOR_ECH = "#FB8C00", COLOR_TR = "#FBC02D", COLOR_PG = "#8E24AA", COLOR_TRPG = "#00897B", COLOR_EFPG = "#3949AB", GREY = "#E0E0E0";
+const COLOR_ECH = "#FB8C00", COLOR_TR = "#FBC02D", COLOR_PG = "#8E24AA", COLOR_TRPG = "#E53935", COLOR_EFPG = "#B71C1C", GREY = "#E0E0E0";
 
 function fmtARS(n){ return "$" + Math.round(n).toLocaleString("es-AR"); }
 function fmtMill(n){ if(!n) return "—"; const m=n/1e6; if(m>=10) return "$ "+m.toFixed(0)+" mill."; if(m>=1) return "$ "+m.toFixed(2).replace(".",",")+" mill."; return "$ "+(n/1000).toFixed(0)+"k"; }
@@ -617,8 +637,8 @@ function renderChart(){
     {label:"Echeqs", data:ech, backgroundColor:labels.map((_,i)=>dim(COLOR_ECH,i)), borderColor:"#E65100", borderWidth:0.5, stack:"s"},
     {label:"Transferencias", data:tr, backgroundColor:labels.map((_,i)=>dim(COLOR_TR,i)), borderColor:"#F57F17", borderWidth:0.5, stack:"s"},
     {label:"Cheques por girar", data:pg, backgroundColor:labels.map((_,i)=>dim(COLOR_PG,i)), borderColor:"#4A148C", borderWidth:0.5, stack:"s"},
-    {label:"Transferencias por girar", data:trpg, backgroundColor:labels.map((_,i)=>dim(COLOR_TRPG,i)), borderColor:"#004D40", borderWidth:0.5, stack:"s"},
-    {label:"Efectivo por girar", data:efpg, backgroundColor:labels.map((_,i)=>dim(COLOR_EFPG,i)), borderColor:"#1A237E", borderWidth:0.5, stack:"s"}
+    {label:"Transferencias por girar", data:trpg, backgroundColor:labels.map((_,i)=>dim(COLOR_TRPG,i)), borderColor:"#B71C1C", borderWidth:0.5, stack:"s"},
+    {label:"Efectivo por girar", data:efpg, backgroundColor:labels.map((_,i)=>dim(COLOR_EFPG,i)), borderColor:"#7F0000", borderWidth:0.5, stack:"s"}
   ];
 
   const ctx = document.getElementById("chartTotal").getContext("2d");
@@ -743,6 +763,30 @@ function renderModalidad(){
     </tbody>`;
 }
 
+function renderUrgencia(){
+  const items = [
+    ...TRANSFERS_POR_GIRAR.map(r=>({proveedor:r[4], categoria:"transferencia", label:"Transferencia", monto:r[3], moneda:"ARS"})),
+    ...EFECTIVO_POR_GIRAR.map(r=>({proveedor:r[4], categoria:"efectivo", label:"Efectivo", monto:r[3], moneda:"ARS"})),
+    ...EFECTIVO_POR_GIRAR_USD.map(r=>({proveedor:r[4], categoria:"efectivo", label:"Efectivo", monto:r[3], moneda:"USD"}))
+  ];
+  const rows = items.map(it=>{
+    const dias = ODOO_ANTIGUEDAD[it.proveedor];
+    const urgent = dias!==undefined && dias>15;
+    const diasHtml = dias!==undefined
+      ? `<span class="urgent-badge">${dias} días</span>`
+      : `<span class="ok-badge">s/d</span>`;
+    const montoTxt = it.moneda==="USD" ? "U$D "+it.monto.toLocaleString("es-AR") : fmtARS(it.monto);
+    return `<tr class="${urgent?'urgent':''}">
+      <td>${it.proveedor}<span class="method-tag ${it.categoria}">${it.label}</span></td>
+      <td style="text-align:center">${diasHtml}</td>
+      <td class="amt">${montoTxt}</td>
+    </tr>`;
+  }).join("");
+  document.getElementById("urgenciaTable").innerHTML = `
+    <thead><tr><th>Proveedor</th><th style="text-align:center">Antigüedad pedido (Odoo)</th><th style="text-align:right">Monto</th></tr></thead>
+    <tbody>${rows}</tbody>`;
+}
+
 function updateSubtitle(){
   const sel = [...selectedMonths].sort((a,b)=>a-b);
   let mtxt;
@@ -755,6 +799,7 @@ function updateSubtitle(){
   document.getElementById("footerNote").innerHTML =
     `Datos sincronizados desde Google Drive · planilla "Historial de pagos" (pestañas Historial de cheques/transferencias/efectivo, Cheques por girar, Transferencias por girar, Efectivo por pagar, Deudas) · foto al 29/07/2026.<br>
      Efectivo por girar incluye el efectivo de Neil ($9.494.556, planilla "Deudas") + Toldos argentina ($2.410.000) + U$D 4.400 de "DM oleohidraulica" (15/07/2026, no sumado al total en pesos).<br>
+     Transferencias y Efectivo por girar se muestran en rojo para destacar urgencia. La tabla "Urgencia" usa la antigüedad del pedido en Odoo (campo "Fecha límite de pedido" = fecha en que se creó el pedido, no fecha de vencimiento del pago) — más de 15 días se resalta en rojo claro.<br>
      A revisar: Resinfibras ($1.141.635) e Ipipsa ($335.350) aparecen con el mismo monto en "Cheques por girar" y en "Transferencias por girar" — podría ser el mismo pago cargado dos veces. También hay dos cheques con fecha vencida (Toldos argentina 15/07 y el primer tramo de Experto 16/07) — revisar si ya se pagaron.`;
 }
 
@@ -766,6 +811,7 @@ function rerender(){
   renderTopList();
   renderDeudas();
   renderModalidad();
+  renderUrgencia();
 }
 
 document.getElementById("yearSel").addEventListener("change", e=>{ selectedYear=e.target.value; rerender(); });
