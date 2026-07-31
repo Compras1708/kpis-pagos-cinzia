@@ -526,14 +526,14 @@ const TRANSFERS_POR_GIRAR = [
   [2026,8,1,392620,"Thinner"]
 ];
 
-// "Efectivo por pagar" — verificado 29/07/2026 desde Google Sheets. DM oleohidraulica está en USD, no se suma al total ARS.
+// "Efectivo por pagar" — actualizado 29/07/2026: la planilla movió la "Fecha requerimiento" de Toldos argentina y DM oleohidraulica a 01/08/2026 (antes 15/07/2026). DM oleohidraulica está en USD, no se suma al total ARS.
 // Neil ($9.494.556, planilla "Deudas") se suma acá como efectivo — no tiene fecha propia, se ubica en el mes actual (Julio).
 const EFECTIVO_POR_GIRAR = [
-  [2026,7,15,2410000,"Toldos argentina"],
+  [2026,8,1,2410000,"Toldos argentina"],
   [2026,7,29,9494556,"Neil"]
 ];
 const EFECTIVO_POR_GIRAR_USD = [
-  [2026,7,15,4400,"DM oleohidraulica"]
+  [2026,8,1,4400,"DM oleohidraulica"]
 ];
 
 // "Deudas" — actualizado 29/07/2026 (planilla "Deudas"), sin fecha por fila; se muestra aparte del gráfico mensual
@@ -798,7 +798,7 @@ function updateSubtitle(){
     `Mostrando: ${mtxt} · año ${selectedYear==="todos"?"completo":selectedYear} · echeqs + transferencias (pagados) + cheques/transferencias/efectivo por girar (a pagar, según fecha de pago prevista)`;
   document.getElementById("footerNote").innerHTML =
     `Datos sincronizados desde Google Drive · planilla "Historial de pagos" (pestañas Historial de cheques/transferencias/efectivo, Cheques por girar, Transferencias por girar, Efectivo por pagar, Deudas) · foto al 29/07/2026.<br>
-     Efectivo por girar incluye el efectivo de Neil ($9.494.556, planilla "Deudas") + Toldos argentina ($2.410.000) + U$D 4.400 de "DM oleohidraulica" (15/07/2026, no sumado al total en pesos).<br>
+     Efectivo por girar incluye el efectivo de Neil ($9.494.556, planilla "Deudas", julio) + Toldos argentina ($2.410.000, 01/08/2026) + U$D 4.400 de "DM oleohidraulica" (01/08/2026, no sumado al total en pesos).<br>
      Transferencias y Efectivo por girar se muestran en rojo para destacar urgencia. La tabla "Urgencia" usa la antigüedad del pedido en Odoo (campo "Fecha límite de pedido" = fecha en que se creó el pedido, no fecha de vencimiento del pago) — más de 15 días se resalta en rojo claro.<br>
      A revisar: Resinfibras ($1.141.635) e Ipipsa ($335.350) aparecen con el mismo monto en "Cheques por girar" y en "Transferencias por girar" — podría ser el mismo pago cargado dos veces. También hay dos cheques con fecha vencida (Toldos argentina 15/07 y el primer tramo de Experto 16/07) — revisar si ya se pagaron.`;
 }
