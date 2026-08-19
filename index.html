@@ -111,8 +111,8 @@
 <div class="wrap">
   <header>
     <h1>📊 KPIs Pagos</h1>
-    <span class="date">Hoy: 29/7/2026</span>
-    <span class="now">Mes actual: Julio 2026</span>
+    <span class="date">Hoy: 19/8/2026</span>
+    <span class="now">Mes actual: Agosto 2026</span>
   </header>
   <p class="subtitle" id="subtitle">Proyección de liquidez: echeqs + transferencias (historial) y cheques + transferencias + efectivo por girar (según fecha de pago prevista)</p>
 
@@ -127,7 +127,7 @@
         <button id="btnNone">Ninguno</button>
       </div>
       <div class="quick-row" style="margin-top:6px; border-top:none; padding-top:0;">
-        <button id="btnNow">Solo julio</button>
+        <button id="btnNow">Solo agosto</button>
         <button id="btnInv">Invertir</button>
       </div>
       <div class="quick-row" style="margin-top:6px; border-top:none; padding-top:0;">
@@ -165,7 +165,7 @@
   <div class="deudascard">
     <header>
       <h2>🧾 Deudas</h2>
-      <span class="dsub">Saldos pendientes por proveedor (planilla "Deudas"). Wurth y Genesis vidrios no se repiten en el gráfico mensual (ya están en cheques/transferencias por girar); Neil sí se refleja en el gráfico como "Efectivo por girar"</span>
+      <span class="dsub">Saldos pendientes por proveedor (planilla "Deudas", último corte 29/07). Proveedores que también aparecen en cheques/transferencias por girar no se repiten en el gráfico mensual; Neil sí se refleja en el gráfico como "Efectivo por girar"</span>
     </header>
     <table class="deudas-table" id="deudasTable"></table>
   </div>
@@ -316,7 +316,6 @@ const ECHEQS = [
   [2025,2,13,434877,"Tapihouse"],
   [2026,2,20,4422286,"Richetta"],[2026,3,20,4422286,"Richetta"],
   [2026,2,20,696339,"T.R.V"],
-  // entradas nuevas detectadas
   [2026,2,18,632752,"Soldmant"],
   [2026,2,12,733002,"Grupo AG"],
   [2026,2,4,1755591,"Ausili"],[2026,2,19,1755591,"Ausili"],
@@ -425,7 +424,6 @@ const ECHEQS = [
   [2026,5,19,951968,"Nelson pinturas"],
   [2026,5,10,4981267,"Esimex"],
   [2026,5,15,887190,"Cáceres ferretería"],
-  // entradas que antes estaban en "por girar", ahora pasaron a historial
   [2026,6,22,1475825,"Caram"],
   [2026,6,11,512700,"Cattaneo"],
   [2026,6,12,629854,"Fag sistems"],[2026,7,12,629854,"Fag sistems"],[2026,8,12,629855,"Fag sistems"],
@@ -448,11 +446,11 @@ const ECHEQS = [
   [2026,6,25,2575485,"Caram"],[2026,7,11,2575485,"Caram"],
   [2026,6,22,362531,"Malkoni"],
   [2026,6,25,784219,"Marco Aurelio Sosa"],[2026,7,10,784219,"Marco Aurelio Sosa"],[2026,7,25,784220,"Marco Aurelio Sosa"],
-  // últimos agregados
   [2026,5,30,2111014,"Experto"],[2026,6,18,2111014,"Experto"],[2026,7,2,2111014,"Experto"],
   [2026,6,20,1815000,"Mercedes Benz"],[2026,7,20,1815000,"Mercedes Benz"],
   [2026,6,27,1397000,"Cáceres ferretería"],
-  [2026,6,29,2815776,"Richetta"],[2026,7,29,2815776,"Richetta"],[2026,8,14,2815776,"Richetta"]
+  [2026,6,29,2815776,"Richetta"],[2026,7,29,2815776,"Richetta"],[2026,8,14,2815776,"Richetta"],
+  [2026,8,15,831916,"Cáceres"],[2026,8,15,1000000,"Dintra"],[2026,8,15,724252,"Textiles del suquia"],[2026,8,17,1612067,"Experto"],[2026,8,17,3128702,"Richetta"],[2026,8,17,2795176,"Experto"],[2026,8,18,598458,"Hissuma"],[2026,8,19,402394,"Gurú store"],[2026,8,19,241077,"Ipipsa"],[2026,8,19,1114271,"Resinfibras"],[2026,8,19,314650,"Legitel"],[2026,8,19,402394,"Gurú store"],[2026,8,19,421988,"CNC insumos"],[2026,8,19,234355,"Flojumar"],[2026,8,19,200000,"Cattaneo"],[2026,8,19,2795176,"Experto"],[2026,8,20,598458,"Hissuma"],[2026,8,20,288877,"Lagos"],[2026,8,20,576000,"Mesadas fibras"],[2026,8,20,725000,"Distribuidora de gas"],[2026,8,20,1035495,"Asia"],[2026,8,20,1152000,"Los gallegos"],[2026,8,20,770000,"Mauro trovato"],[2026,8,22,2795176,"Experto"],[2026,8,24,2394897,"Marco Aurelio Sosa"],[2026,8,24,1604945,"Nelson pinturas"],[2026,8,24,241077,"Ipipsa"],[2026,8,24,1114271,"Resinfibras"],[2026,8,25,2991862,"TRV"],[2026,8,25,1762074,"Caram"],[2026,8,25,325025,"Sbacco"],[2026,8,25,749291,"Alpross"],[2026,8,26,337625,"Rola gases"],[2026,8,29,1157594,"Car pack"],[2026,8,30,831916,"Cáceres"],[2026,8,30,4543838,"Wurth"],[2026,8,30,2795175,"Experto"],[2026,8,31,1330800,"Avin ice"],[2026,9,1,2166354,"TRV"],[2026,9,1,1597097,"Argenpur"],[2026,9,1,770000,"Mauro trovato"],[2026,9,3,598458,"Hissuma"],[2026,9,4,2333334,"Flojumar"],[2026,9,4,1000000,"Rancagua"],[2026,9,5,598458,"Hissuma"],[2026,9,10,2991862,"TRV"],[2026,9,10,1440000,"Cattaneo"],[2026,9,10,1762074,"Caram"],[2026,9,10,972885,"Wurth"],[2026,9,10,1200000,"Todo fer"],[2026,9,10,2388629,"Richetta"],[2026,9,11,3630000,"Mercedes Benz"],[2026,9,12,2284666,"Mecanizados san miguel"],[2026,9,14,2795175,"Experto"],[2026,9,14,598458,"Hissuma"],[2026,9,14,1254006,"Flojumar"],[2026,9,19,1200000,"Dintra"],[2026,9,20,598459,"Hissuma"],[2026,9,24,2394897,"Marco Aurelio Sosa"],[2026,9,29,1002101,"Tapihouse"],[2026,10,1,2166355,"TRV"],[2026,10,1,1597096,"Argenpur"],[2026,10,1,2795175,"Experto"],[2026,10,4,2333333,"Flojumar"],[2026,10,10,1440000,"Cattaneo"],[2026,10,10,2166354,"TRV"],[2026,10,12,2284666,"Mecanizados san miguel"],[2026,10,24,2394897,"Marco Aurelio Sosa"],[2026,10,30,1254006,"Flojumar"],[2026,11,4,2333333,"Flojumar"],[2026,11,14,1254005,"Flojumar"]
 ];
 
 const TRANSFERS = [
@@ -474,63 +472,39 @@ const TRANSFERS = [
   [2026,6,10,875760,"Probattery"],
   [2026,6,10,654000,"Enertikk"],
   [2026,6,10,440000,"Bayma"],
-  [2026,6,10,124000,"Elasticos"]
+  [2026,6,10,124000,"Elasticos"],
+  [2026,6,17,14665700,"CNC"],[2026,6,22,880000,"Bayma"],[2026,6,22,161725.47,"Richetta"],[2026,6,22,780000,"Rototech"],[2026,6,22,580000,"Thinner"],[2026,7,6,238634.4,"Lago"],[2026,7,6,552406.14,"Revegler"],[2026,7,6,495000.41,"Peralta"],[2026,7,6,234000,"Guayabi"],[2026,7,6,580000,"Gas"],[2026,7,6,1047878,"Duchas"],[2026,7,6,76204.81,"Gema"],[2026,7,6,1012500,"Parcamp"],[2026,7,6,175000,"Rototech"],[2026,7,6,190800,"Unicom"],[2026,7,6,262776.45,"Alfaser"],[2026,7,6,414000,"AMP"],[2026,7,6,673000,"Mesadas"],[2026,7,24,253900,"Espejos"],[2026,7,24,375000,"ESPEJOpvc"],[2026,8,14,761890,"Luces"],[2026,8,14,60000,"Zincados"],[2026,8,14,1062000,"Peralta"],[2026,8,14,1665000,"Rototech"],[2026,8,14,254400,"Perillas"],[2026,8,14,216000,"Espejo"],[2026,8,14,816750,"Legitel"],[2026,8,14,145200,"Cugat"],[2026,8,14,618390,"thinner"],[2026,8,14,66600,"Sbacco"],[2026,8,14,24500,"g y g"]
 ];
 
-// "Cheques por girar" — actualizado 29/07/2026 desde Google Sheets (fecha = "Fecha de pago" prevista)
+// "Cheques por girar" — actualizado 19/08/2026 desde Google Sheets (fecha = "Fecha de pago" prevista). Reemplaza por completo la lista anterior (proveedores nuevos).
 const POR_GIRAR = [
-  [2026,7,30,4543838,"Wurth"],
-  [2026,8,10,972885,"Wurth"],
-  [2026,7,30,1305590,"Wurth"],
-  [2026,8,10,4006478,"Wurth"],
-  [2026,8,15,1330800,"Avin ice"],
-  [2026,8,1,1157594,"Carpack"],
-  [2026,9,1,1200000,"Todo Fer"],
-  [2026,8,1,319200,"Af distribuidora"],[2026,8,16,319200,"Af distribuidora"],
-  [2026,9,1,1200000,"Rancagua"],
-  [2026,8,1,327129,"Hissuma"],[2026,8,16,327129,"Hissuma"],[2026,9,1,327128,"Hissuma"],[2026,9,16,327128,"Hissuma"],
-  [2026,8,7,831916,"Cáceres ferretería"],[2026,8,15,831916,"Cáceres ferretería"],
-  [2026,8,7,827292,"Proyectando"],
-  [2026,8,9,972173,"Tapihouse"],[2026,9,29,1002101,"Tapihouse"],
-  [2026,7,15,473000,"Toldos argentina"], // fecha vencida (hoy 29/07) — revisar, posible atraso
-  [2026,8,4,1141635,"Resinfibras"],
-  [2026,8,4,335350,"Ipipsa"],
-  [2026,8,15,1000000,"Dintra"],[2026,8,15,1200000,"Dintra"],
-  [2026,7,16,2721225,"Experto"], // fecha vencida (hoy 29/07) — revisar, posible atraso
-  [2026,7,31,2721225,"Experto"],[2026,8,15,2721225,"Experto"],[2026,8,30,2721225,"Experto"],[2026,9,14,2721225,"Experto"],[2026,10,1,2721225,"Experto"],
-  [2026,8,19,724252,"Textiles del suquía"],[2026,8,29,724252,"Textiles del suquía"],
-  [2026,8,24,1604945,"Nelson pinturas"],
-  [2026,9,1,2166354,"T.R.V"],[2026,10,1,2166355,"T.R.V"],[2026,10,10,2166354,"T.R.V"],
-  [2026,8,1,1750000,"Flujomar"],[2026,9,1,1750000,"Flujomar"],[2026,10,1,1750000,"Flujomar"],[2026,11,1,1750000,"Flujomar"]
+  [2026,9,5,670028,"Carpack"],
+  [2026,8,24,314600,"Menapace"],[2026,9,4,710000,"Menapace"],
+  [2026,9,4,3547752,"Caram"],[2026,10,4,3547752,"Caram"],[2026,11,4,3547752,"Caram"],[2026,9,11,2695320,"Caram"],[2026,9,26,2695320,"Caram"],
+  [2026,8,20,288639,"Embalacor"],
+  [2026,9,6,893738,"Alfaser"],[2026,9,16,893737,"Alfaser"],
+  [2026,8,21,3194400,"Mercedes Benz"],[2026,9,15,3194400,"Mercedes Benz"],[2026,10,15,3194400,"Mercedes Benz"],[2026,11,15,3194400,"Mercedes Benz"],[2026,12,15,3194400,"Mercedes Benz"],
+  [2026,9,14,1000000,"Rancagua"],
+  [2026,8,29,621324,"Tapihouse"],[2026,9,18,672066,"Tapihouse"],
+  [2026,9,25,3632645,"Wurth"]
 ];
 
-// "Transferencias por girar" — actualizado 29/07/2026 desde Google Sheets (fecha = "Fecha")
+// "Transferencias por girar" — actualizado 19/08/2026 desde Google Sheets, todas con fecha 14/08/2026. Reemplaza por completo la lista anterior.
 const TRANSFERS_POR_GIRAR = [
-  [2026,8,1,100000,"Chapista"],
-  [2026,8,1,1035495,"Asia"],
-  [2026,8,1,421987.50,"CNC Router"],
-  [2026,8,1,665217.34,"La Rocca Juan Martin"],
-  [2026,8,1,200000,"Cattaneo"],
-  [2026,8,1,1895230,"Legitel"],
-  [2026,8,1,272250,"Lonas Bedran"],
-  [2026,8,1,95000,"Compufix"],
-  [2026,8,1,145200,"Cugat"],
-  [2026,8,1,102000,"Lagos Hermanos"],
-  [2026,8,1,1141635,"Resinfibras"],
-  [2026,8,1,335350,"Ipipsa"],
-  [2026,8,1,33100,"Avin ice"],
-  [2026,8,1,576000,"Mesadas"],
-  [2026,8,1,234355,"Flujomar"],
-  [2026,8,1,112500,"Genesis vidrios"],
-  [2026,8,1,880000,"Homologación"],
-  [2026,8,1,392620,"Thinner"]
+  [2026,8,14,491516,"Luces led"],
+  [2026,8,14,1409400,"Patas camper"],
+  [2026,8,14,490000,"PC SABRI"],
+  [2026,8,14,725000,"Gas"],
+  [2026,8,14,335691,"Enganches"],
+  [2026,8,14,510000,"Peralta"],
+  [2026,8,14,112026,"ND wurth"]
 ];
 
 // "Efectivo por pagar" — actualizado 29/07/2026: la planilla movió la "Fecha requerimiento" de Toldos argentina y DM oleohidraulica a 01/08/2026 (antes 15/07/2026). DM oleohidraulica está en USD, no se suma al total ARS.
-// Neil ($9.494.556, planilla "Deudas") se suma acá como efectivo — no tiene fecha propia, se ubica en el mes actual (Julio).
+// Neil ($9.494.556, planilla "Deudas") se suma acá como efectivo — no tiene fecha propia, se ubica en el mes actual (Agosto).
 const EFECTIVO_POR_GIRAR = [
   [2026,8,1,2410000,"Toldos argentina"],
-  [2026,7,29,9494556,"Neil"]
+  [2026,8,19,9494556,"Neil"]
 ];
 const EFECTIVO_POR_GIRAR_USD = [
   [2026,8,1,4400,"DM oleohidraulica"]
@@ -558,7 +532,7 @@ const ODOO_ANTIGUEDAD = {
   "Cugat":166, "Legitel":154, "Asia":134, "Avin ice":102
 };
 
-const CURRENT_YEAR = 2026, CURRENT_MONTH = 7;
+const CURRENT_YEAR = 2026, CURRENT_MONTH = 8;
 const MONTH_NAMES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const MONTH_SHORT = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 const COLOR_ECH = "#FB8C00", COLOR_TR = "#FBC02D", COLOR_PG = "#8E24AA", COLOR_TRPG = "#E53935", COLOR_EFPG = "#B71C1C", GREY = "#E0E0E0";
@@ -617,7 +591,7 @@ function renderKpis(){
     {lbl:"Cheques por girar", val:fmtMill(pg), sub:"pendientes de emitir", cls:"pg"},
     {lbl:"Transferencias por girar", val:fmtMill(trpg), sub:"pendientes de hacer", cls:"trpg"},
     {lbl:"Efectivo por girar", val:fmtMill(efpg), sub:"incluye Neil + U$D 4.400 (DM oleohidr.)", cls:"efpg"},
-    {lbl:"Julio (mes actual)", val:fmtMill(mesTot), sub:"todas las categorías", cls:"total"},
+    {lbl:"Agosto (mes actual)", val:fmtMill(mesTot), sub:"todas las categorías", cls:"total"},
     {lbl:"Total a desembolsar", val:fmtMill(totPorGirar), sub:"cheques + transf. + efectivo por girar", cls:"total"}
   ];
   document.getElementById("kpis").innerHTML = cards.map(c=>`<div class="kpi ${c.cls}"><div class="lbl">${c.lbl}</div><div class="val">${c.val}</div><div class="sub">${c.sub}</div></div>`).join("");
@@ -666,7 +640,7 @@ function renderChart(){
           footerFont:{size:12, weight:700},
           footerMarginTop:8,
           callbacks:{
-            title:(it)=>it[0].label + (it[0].label==="Julio"?"  ← MES ACTUAL":""),
+            title:(it)=>it[0].label + (it[0].label==="Agosto"?"  ← MES ACTUAL":""),
             label:(c)=>c.dataset.label+": "+fmtARS(c.parsed.y),
             footer:(it)=>"Total mes: "+fmtARS(it.reduce((s,i)=>s+i.parsed.y,0))
           }
@@ -676,8 +650,8 @@ function renderChart(){
         x:{
           stacked:true,
           ticks:{
-            color:(ctx)=>ctx.index===6?"#E65100":"#444",
-            font:(ctx)=>({size:12, weight:ctx.index===6?700:500})
+            color:(ctx)=>ctx.index===7?"#E65100":"#444",
+            font:(ctx)=>({size:12, weight:ctx.index===7?700:500})
           },
           grid:{display:false}
         },
@@ -701,7 +675,7 @@ function renderChart(){
           if(!tot) return;
           const xPx = chart.getDatasetMeta(0).data[i].x;
           const yPx = y.getPixelForValue(tot);
-          ctx.fillStyle = i===6 ? "#E65100" : "#333";
+          ctx.fillStyle = i===7 ? "#E65100" : "#333";
           ctx.fillText(fmtMillShort(tot), xPx, yPx - 6);
         });
         ctx.restore();
@@ -797,10 +771,10 @@ function updateSubtitle(){
   document.getElementById("subtitle").textContent =
     `Mostrando: ${mtxt} · año ${selectedYear==="todos"?"completo":selectedYear} · echeqs + transferencias (pagados) + cheques/transferencias/efectivo por girar (a pagar, según fecha de pago prevista)`;
   document.getElementById("footerNote").innerHTML =
-    `Datos sincronizados desde Google Drive · planilla "Historial de pagos" (pestañas Historial de cheques/transferencias/efectivo, Cheques por girar, Transferencias por girar, Efectivo por pagar, Deudas) · foto al 29/07/2026.<br>
-     Efectivo por girar incluye el efectivo de Neil ($9.494.556, planilla "Deudas", julio) + Toldos argentina ($2.410.000, 01/08/2026) + U$D 4.400 de "DM oleohidraulica" (01/08/2026, no sumado al total en pesos).<br>
-     Transferencias y Efectivo por girar se muestran en rojo para destacar urgencia. La tabla "Urgencia" usa la antigüedad del pedido en Odoo (campo "Fecha límite de pedido" = fecha en que se creó el pedido, no fecha de vencimiento del pago) — más de 15 días se resalta en rojo claro.<br>
-     A revisar: Resinfibras ($1.141.635) e Ipipsa ($335.350) aparecen con el mismo monto en "Cheques por girar" y en "Transferencias por girar" — podría ser el mismo pago cargado dos veces. También hay dos cheques con fecha vencida (Toldos argentina 15/07 y el primer tramo de Experto 16/07) — revisar si ya se pagaron.`;
+    `Datos sincronizados desde Google Drive · planilla "Historial de pagos" (pestañas Historial de cheques, Historial transferencias, Cheques por girar, Transferencias por girar, Efectivo por pagar) · foto al 19/08/2026.<br>
+     Historial de cheques y transferencias: se agregaron los movimientos nuevos desde el último corte (14/08 y 10/06 respectivamente). Cheques por girar y Transferencias por girar: listas reemplazadas por completo con la foto actual de la planilla.<br>
+     Efectivo por girar incluye el efectivo de Neil ($9.494.556, planilla "Deudas", agosto) + Toldos argentina ($2.410.000, 01/08/2026) + U$D 4.400 de "DM oleohidraulica" (01/08/2026, no sumado al total en pesos).<br>
+     Transferencias y Efectivo por girar se muestran en rojo para destacar urgencia. La tabla "Urgencia" usa antigüedad de pedidos en Odoo calculada el 29/07 — los proveedores de la nueva lista de Transferencias por girar (Luces led, Patas camper, PC SABRI, Gas, Enganches, Peralta, ND wurth) todavía no fueron cruzados con Odoo, por eso figuran "s/d".`;
 }
 
 function rerender(){
