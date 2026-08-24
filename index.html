@@ -12,7 +12,7 @@
 <title>KPIs Pagos · Echeqs, Transferencias y Por Girar</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
 <style>
-  :root { color-scheme: light; --ech:#FB8C00; --tr:#FBC02D; --pg:#8E24AA; --trpg:#E53935; --efpg:#B71C1C; --deuda:#D32F2F; --ink:#1f1f1f; --muted:#666; --line:#e5e5e5; --bg:#fafafa; }
+  :root { color-scheme: light; --ech:#FB8C00; --tr:#FBC02D; --pg:#8E24AA; --trpg:#E53935; --efpg:#B71C1C; --intl:#00ACC1; --deuda:#D32F2F; --ink:#1f1f1f; --muted:#666; --line:#e5e5e5; --bg:#fafafa; }
   * { box-sizing: border-box; }
   body { margin: 0; padding: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
   .wrap { max-width: 1400px; margin: 0 auto; padding: 28px 32px; }
@@ -31,6 +31,7 @@
   .kpi.pg::before { background: var(--pg); }
   .kpi.trpg::before { background: var(--trpg); }
   .kpi.efpg::before { background: var(--efpg); }
+  .kpi.intl::before { background: var(--intl); }
   .kpi.total::before { background: #424242; }
   .kpi .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; padding-left: 8px; }
   .kpi .val { font-size: 26px; font-weight: 800; margin-top: 6px; padding-left: 8px; line-height: 1.1; }
@@ -142,13 +143,14 @@
 
     <div class="chartcard">
       <h2 id="chartTitle">Pagos por mes (fecha de pago prevista)</h2>
-      <div class="ssub">Naranja = echeqs (historial). Amarillo = transferencias (historial). Morado = cheques por girar. Rojo = transferencias por girar. Rojo oscuro = efectivo por girar (destacados para marcar urgencia).</div>
+      <div class="ssub">Naranja = echeqs (historial). Amarillo = transferencias (historial). Morado = cheques por girar. Rojo = transferencias por girar. Celeste = compras internacionales. Rojo oscuro = efectivo por girar (destacados para marcar urgencia).</div>
       <div class="chart-wrap"><canvas id="chartTotal"></canvas></div>
       <div class="legendrow">
         <div class="it"><span class="swatch" style="background:#FB8C00"></span>Echeqs (historial)</div>
         <div class="it"><span class="swatch" style="background:#FBC02D"></span>Transferencias (historial)</div>
         <div class="it"><span class="swatch" style="background:#8E24AA"></span>Cheques por girar</div>
         <div class="it"><span class="swatch" style="background:#E53935"></span>Transferencias por girar</div>
+        <div class="it"><span class="swatch" style="background:#00ACC1"></span>Compras internacionales</div>
         <div class="it"><span class="swatch" style="background:#B71C1C"></span>Efectivo por girar</div>
       </div>
     </div>
@@ -313,13 +315,14 @@ const TRANSFERS = [
   [2026,8,14,618390,"Thinner"],[2026,8,14,66600,"Sbacco"],[2026,8,14,24500,"G y G"],[2026,8,14,1409400,"Patas camper"]
 ];
 
-// "Cheques por girar" — actualizado 24/08/2026 desde Google Sheets. Reemplaza por completo la lista anterior.
+// "Cheques por girar" — actualizado 24/08/2026 desde Google Sheets, con 3 filas de TRV agregadas después (28 filas, $52.030.658). Reemplaza por completo la lista anterior.
 const POR_GIRAR = [
   [2026,9,5,670028,"Car pack"],[2026,8,26,314600,"Menapace ingenieria"],[2026,9,4,710000,"Menapace ingenieria"],[2026,9,4,3547752,"Caram"],[2026,10,4,3547752,"Caram"],
   [2026,11,4,3547752,"Caram"],[2026,9,11,2695320,"Caram"],[2026,9,26,2695320,"Caram"],[2026,8,27,288639,"Embalacor"],[2026,9,6,893738,"Alfaser"],
   [2026,9,16,893737,"Alfaser"],[2026,8,21,3194400,"Mercedes Benz"],[2026,9,15,3194400,"Mercedes Benz"],[2026,10,15,3194400,"Mercedes Benz"],[2026,11,15,3194400,"Mercedes Benz"],
   [2026,12,15,3194400,"Mercedes Benz"],[2026,9,24,1000000,"Rancagua"],[2026,8,29,621324,"Tapihouse"],[2026,9,18,1366240,"Tapihouse"],[2026,9,25,3632645,"Wurth"],
-  [2026,8,28,632874,"Ingelmo Leandro"],[2026,9,20,632874,"Ingelmo Leandro"],[2026,10,20,632875,"Ingelmo Leandro"],[2026,9,6,618574,"Siccba"],[2026,9,20,618574,"Siccba"]
+  [2026,8,28,632874,"Ingelmo Leandro"],[2026,9,20,632874,"Ingelmo Leandro"],[2026,10,20,632875,"Ingelmo Leandro"],[2026,9,6,618574,"Siccba"],[2026,9,20,618574,"Siccba"],
+  [2026,9,18,2166013,"TRV"],[2026,10,18,2166013,"TRV"],[2026,10,28,2166014,"TRV"]
 ];
 
 // "Transferencias por girar" — actualizado 24/08/2026 desde Google Sheets, todas con fecha 27/08/2026. Reemplaza por completo la lista anterior.
@@ -332,6 +335,17 @@ const TRANSFERS_POR_GIRAR = [
 const EFECTIVO_POR_GIRAR = [
 ];
 const EFECTIVO_POR_GIRAR_USD = [
+];
+
+// "Compras internacionales" — importación en tránsito marítimo del proveedor CNC Router (planilla aparte, no en "Historial de pagos").
+// Montos originales en USD convertidos a ARS: nacionalización a TC 1500, el resto (mercadería 30%+70%, forwarder, despachantes) a TC 1520.
+// Total USD: U$D 61.112 (mercadería U$D 32.800 ya pagada dic-2025/jun-2026 + logística U$D 28.312 pendiente). Nota: la planilla muestra un total de logística de $28.312,15 pero los 3 conceptos visibles suman $28.312,00 — diferencia de U$D 0,15 sin identificar, no afecta el cálculo de forma relevante.
+const COMPRAS_INTERNACIONALES = [
+  [2025,12,28,17328000,"CNC Router - Mercadería 30%"],
+  [2026,6,18,32528000,"CNC Router - Mercadería 70%"],
+  [2026,9,29,14972000,"CNC Router - Forwarder"],
+  [2026,10,1,26644500,"CNC Router - Nacionalización"],
+  [2026,10,15,1062480,"CNC Router - Despachante"]
 ];
 
 // "Deudas" — última foto disponible (29/07/2026); la pestaña "Deudas" ya no existe en el archivo y no se pudo re-verificar en esta actualización (24/08). Ojo: el echeq de Wurth $4.543.838 ya aparece en el historial de cheques pagado el 30/08/2026 — podría estar duplicado con esta fila.
@@ -358,7 +372,7 @@ const ODOO_ANTIGUEDAD = {
 const CURRENT_YEAR = 2026, CURRENT_MONTH = 8;
 const MONTH_NAMES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const MONTH_SHORT = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
-const COLOR_ECH = "#FB8C00", COLOR_TR = "#FBC02D", COLOR_PG = "#8E24AA", COLOR_TRPG = "#E53935", COLOR_EFPG = "#B71C1C", GREY = "#E0E0E0";
+const COLOR_ECH = "#FB8C00", COLOR_TR = "#FBC02D", COLOR_PG = "#8E24AA", COLOR_TRPG = "#E53935", COLOR_EFPG = "#B71C1C", COLOR_INTL = "#00ACC1", GREY = "#E0E0E0";
 
 function fmtARS(n){ return "$" + Math.round(n).toLocaleString("es-AR"); }
 function fmtMill(n){ if(!n) return "—"; const m=n/1e6; if(m>=10) return "$ "+m.toFixed(0)+" mill."; if(m>=1) return "$ "+m.toFixed(2).replace(".",",")+" mill."; return "$ "+(n/1000).toFixed(0)+"k"; }
@@ -371,18 +385,19 @@ function passesYear(y){ return selectedYear==="todos" || y===parseInt(selectedYe
 function passesMonth(m){ return selectedMonths.has(m); }
 
 function totalsByMonth(){
-  const out={}; for(let m=1;m<=12;m++) out[m]={ech:0,tr:0,pg:0,trpg:0,efpg:0};
+  const out={}; for(let m=1;m<=12;m++) out[m]={ech:0,tr:0,pg:0,trpg:0,efpg:0,intl:0};
   ECHEQS.forEach(r=>{ if(passesYear(r[0])) out[r[1]].ech+=r[3]; });
   TRANSFERS.forEach(r=>{ if(passesYear(r[0])) out[r[1]].tr+=r[3]; });
   POR_GIRAR.forEach(r=>{ if(passesYear(r[0])) out[r[1]].pg+=r[3]; });
   TRANSFERS_POR_GIRAR.forEach(r=>{ if(passesYear(r[0])) out[r[1]].trpg+=r[3]; });
   EFECTIVO_POR_GIRAR.forEach(r=>{ if(passesYear(r[0])) out[r[1]].efpg+=r[3]; });
+  COMPRAS_INTERNACIONALES.forEach(r=>{ if(passesYear(r[0])) out[r[1]].intl+=r[3]; });
   return out;
 }
 
 function providerTotals(){
   const t={};
-  [ECHEQS,TRANSFERS,POR_GIRAR,TRANSFERS_POR_GIRAR,EFECTIVO_POR_GIRAR].forEach(arr=>arr.forEach(r=>{
+  [ECHEQS,TRANSFERS,POR_GIRAR,TRANSFERS_POR_GIRAR,EFECTIVO_POR_GIRAR,COMPRAS_INTERNACIONALES].forEach(arr=>arr.forEach(r=>{
     if(passesYear(r[0]) && passesMonth(r[1])) t[r[4]] = (t[r[4]]||0)+r[3];
   }));
   return t;
@@ -401,12 +416,13 @@ function renderMonthList(){
 }
 
 function renderKpis(){
-  let ech=0, tr=0, pg=0, trpg=0, efpg=0, mesTot=0;
+  let ech=0, tr=0, pg=0, trpg=0, efpg=0, intl=0, mesTot=0;
   ECHEQS.forEach(r=>{ if(passesYear(r[0])&&passesMonth(r[1])){ ech+=r[3]; if(r[1]===CURRENT_MONTH && r[0]===CURRENT_YEAR) mesTot+=r[3]; } });
   TRANSFERS.forEach(r=>{ if(passesYear(r[0])&&passesMonth(r[1])){ tr+=r[3]; if(r[1]===CURRENT_MONTH && r[0]===CURRENT_YEAR) mesTot+=r[3]; } });
   POR_GIRAR.forEach(r=>{ if(passesYear(r[0])&&passesMonth(r[1])){ pg+=r[3]; if(r[1]===CURRENT_MONTH && r[0]===CURRENT_YEAR) mesTot+=r[3]; } });
   TRANSFERS_POR_GIRAR.forEach(r=>{ if(passesYear(r[0])&&passesMonth(r[1])){ trpg+=r[3]; if(r[1]===CURRENT_MONTH && r[0]===CURRENT_YEAR) mesTot+=r[3]; } });
   EFECTIVO_POR_GIRAR.forEach(r=>{ if(passesYear(r[0])&&passesMonth(r[1])){ efpg+=r[3]; if(r[1]===CURRENT_MONTH && r[0]===CURRENT_YEAR) mesTot+=r[3]; } });
+  COMPRAS_INTERNACIONALES.forEach(r=>{ if(passesYear(r[0])&&passesMonth(r[1])){ intl+=r[3]; if(r[1]===CURRENT_MONTH && r[0]===CURRENT_YEAR) mesTot+=r[3]; } });
   const totPorGirar = pg+trpg+efpg;
   const cards = [
     {lbl:"Total Echeqs", val:fmtMill(ech), sub:"historial de cheques", cls:"ech"},
@@ -414,6 +430,7 @@ function renderKpis(){
     {lbl:"Cheques por girar", val:fmtMill(pg), sub:"pendientes de emitir", cls:"pg"},
     {lbl:"Transferencias por girar", val:fmtMill(trpg), sub:"pendientes de hacer", cls:"trpg"},
     {lbl:"Efectivo por girar", val:fmtMill(efpg), sub:"planilla \"Efectivo por pagar\" ya no existe", cls:"efpg"},
+    {lbl:"Compras internacionales", val:fmtMill(intl), sub:"CNC Router · U$D 61.112 (TC 1500/1520)", cls:"intl"},
     {lbl:"Agosto (mes actual)", val:fmtMill(mesTot), sub:"todas las categorías", cls:"total"},
     {lbl:"Total a desembolsar", val:fmtMill(totPorGirar), sub:"cheques + transf. + efectivo por girar", cls:"total"}
   ];
@@ -429,12 +446,14 @@ function renderChart(){
   const pg = labels.map((_,i)=>d[i+1].pg);
   const trpg = labels.map((_,i)=>d[i+1].trpg);
   const efpg = labels.map((_,i)=>d[i+1].efpg);
+  const intl = labels.map((_,i)=>d[i+1].intl);
   const dim = (c,i)=>passesMonth(i+1)?c:GREY;
   const datasets = [
     {label:"Echeqs", data:ech, backgroundColor:labels.map((_,i)=>dim(COLOR_ECH,i)), borderColor:"#E65100", borderWidth:0.5, stack:"s"},
     {label:"Transferencias", data:tr, backgroundColor:labels.map((_,i)=>dim(COLOR_TR,i)), borderColor:"#F57F17", borderWidth:0.5, stack:"s"},
     {label:"Cheques por girar", data:pg, backgroundColor:labels.map((_,i)=>dim(COLOR_PG,i)), borderColor:"#4A148C", borderWidth:0.5, stack:"s"},
     {label:"Transferencias por girar", data:trpg, backgroundColor:labels.map((_,i)=>dim(COLOR_TRPG,i)), borderColor:"#B71C1C", borderWidth:0.5, stack:"s"},
+    {label:"Compras internacionales", data:intl, backgroundColor:labels.map((_,i)=>dim(COLOR_INTL,i)), borderColor:"#00695C", borderWidth:0.5, stack:"s"},
     {label:"Efectivo por girar", data:efpg, backgroundColor:labels.map((_,i)=>dim(COLOR_EFPG,i)), borderColor:"#7F0000", borderWidth:0.5, stack:"s"}
   ];
 
@@ -596,9 +615,10 @@ function updateSubtitle(){
     `Datos sincronizados desde Google Drive · planilla "Historial de pagos" · foto al 24/08/2026.<br>
      Reconciliación completa: Historial de cheques (620 filas, $1.081.530.361 acumulado histórico) y Historial transferencias (64 filas con fecha, $49.799.232) recargados desde cero — se habían quedado 69 cheques ($97.817.390) y 7 transferencias ($3.744.000) sin cargar en actualizaciones anteriores.<br>
      6 transferencias del historial (Gas $540.000, Bayma $440.000, Peralta $896.000, Listones $90.000, Espejo $36.600, Cugat $332.000 = $2.334.600) no tienen fecha cargada en la planilla, por eso no están incluidas en el gráfico mensual — quedan pendientes de confirmar.<br>
-     Cheques por girar (25 filas, $45.532.618) y Transferencias por girar (7 filas, $3.520.233, todas con fecha 27/08) recalculados fila por fila desde la planilla — la lista anterior tenía "Patas camper" $1.409.400 de más (ya fue pagado el 14/08, está en el historial).<br>
+     Cheques por girar (28 filas, $52.030.658, incluye 3 echeqs de TRV agregados el 24/08) y Transferencias por girar (7 filas, $3.520.233, todas con fecha 27/08) recalculados fila por fila desde la planilla — la lista anterior tenía "Patas camper" $1.409.400 de más (ya fue pagado el 14/08, está en el historial).<br>
      Efectivo por girar: la planilla "Efectivo por pagar" ya no existe en el archivo → $0. Deudas y Efectivo/Depósito bancario (Neil, Wurth, Genesis vidrios, Toldos argentina, DM oleohidraulica) muestran la última foto del 29/07 sin re-verificar: esa pestaña "Deudas" también desapareció. El echeq de Wurth $4.543.838 ya figura pagado en el historial (30/08/2026) — podría estar duplicado con la fila de Deudas.<br>
-     La tabla "Urgencia" usa antigüedad de pedidos en Odoo calculada el 29/07 — los proveedores de Transferencias por girar todavía no fueron cruzados con Odoo, por eso figuran "s/d".`;
+     La tabla "Urgencia" usa antigüedad de pedidos en Odoo calculada el 29/07 — los proveedores de Transferencias por girar todavía no fueron cruzados con Odoo, por eso figuran "s/d".<br>
+     Compras internacionales (nuevo, 24/08): importación en tránsito marítimo de CNC Router, U$D 61.112 en total — mercadería U$D 32.800 (30% pagado dic-2025, 70% pagado jun-2026) + nacionalización/forwarder/despachantes U$D 28.312 (pendientes, oct-2026). Convertido a ARS con TC 1500 para nacionalización y TC 1520 para el resto, según lo indicado. No incluye Dongtai.`;
 }
 
 function rerender(){
