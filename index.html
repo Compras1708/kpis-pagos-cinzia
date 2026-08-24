@@ -166,22 +166,6 @@
 
   <div class="deudascard">
     <header>
-      <h2>🧾 Deudas</h2>
-      <span class="dsub">Saldos pendientes por proveedor — última foto disponible (planilla "Deudas", 29/07); esa pestaña ya no existe en el archivo, no se pudo re-verificar en esta actualización</span>
-    </header>
-    <table class="deudas-table" id="deudasTable"></table>
-  </div>
-
-  <div class="deudascard">
-    <header>
-      <h2>💵 Efectivo y Depósito bancario</h2>
-      <span class="dsub">Pagos pendientes por modalidad — última foto disponible (misma fuente que "Deudas", no re-verificada)</span>
-    </header>
-    <table class="deudas-table" id="modalidadTable"></table>
-  </div>
-
-  <div class="deudascard">
-    <header>
       <h2>🚨 Urgencia — Transferencias y Efectivo por girar</h2>
       <span class="dsub">Antigüedad del pedido de compra en Odoo ("Fecha límite de pedido"). Filas en rojo claro: más de 15 días — mayor urgencia de pago. "s/d" = proveedor sin pedido pendiente encontrado en Odoo con ese nombre</span>
     </header>
@@ -346,20 +330,6 @@ const COMPRAS_INTERNACIONALES = [
   [2026,9,29,14972000,"CNC Router - Forwarder"],
   [2026,10,1,26644500,"CNC Router - Nacionalización"],
   [2026,10,15,1062480,"CNC Router - Despachante"]
-];
-
-// "Deudas" — última foto disponible (29/07/2026); la pestaña "Deudas" ya no existe en el archivo y no se pudo re-verificar en esta actualización (24/08). Ojo: el echeq de Wurth $4.543.838 ya aparece en el historial de cheques pagado el 30/08/2026 — podría estar duplicado con esta fila.
-const DEUDAS = [
-  {proveedor:"Neil", metodo:"efectivo", monto:9494556},
-  {proveedor:"Wurth", metodo:"echeq", monto:4543838},
-  {proveedor:"Genesis vidrios", metodo:"transferencia", monto:113000}
-];
-
-// Modalidades "dinero físico": Efectivo y Depósito bancario — excluye echeqs y transferencias electrónicas
-const MODALIDADES_FISICAS = [
-  {proveedor:"Neil", metodo:"efectivo", monto:9494556, moneda:"ARS"},
-  {proveedor:"DM oleohidraulica", metodo:"efectivo", monto:4400, moneda:"USD"},
-  {proveedor:"Toldos argentina", metodo:"deposito", monto:2410000, moneda:"ARS"}
 ];
 
 // Antigüedad del pedido en Odoo ("Fecha límite de pedido" = date_order), en días, al 29/07/2026.
@@ -547,37 +517,6 @@ function renderTopList(){
   document.getElementById("topInfo").textContent = `Top 15 · ${monthCount} mes${monthCount===1?"":"es"} seleccionado${monthCount===1?"":"s"}${yearTxt}`;
 }
 
-function renderDeudas(){
-  const total = DEUDAS.reduce((s,d)=>s+d.monto,0);
-  const rows = DEUDAS.map(d=>`<tr>
-      <td>${d.proveedor}<span class="method-tag ${d.metodo}">${d.metodo}</span></td>
-      <td class="amt">${fmtARS(d.monto)}</td>
-    </tr>`).join("");
-  document.getElementById("deudasTable").innerHTML = `
-    <thead><tr><th>Proveedor</th><th style="text-align:right">Monto adeudado</th></tr></thead>
-    <tbody>
-      ${rows}
-      <tr class="totrow"><td>Total deudas</td><td class="amt">${fmtARS(total)}</td></tr>
-    </tbody>`;
-}
-
-function renderModalidad(){
-  const totalARS = MODALIDADES_FISICAS.filter(d=>d.moneda==="ARS").reduce((s,d)=>s+d.monto,0);
-  const totalUSD = MODALIDADES_FISICAS.filter(d=>d.moneda==="USD").reduce((s,d)=>s+d.monto,0);
-  const rows = MODALIDADES_FISICAS.map(d=>`<tr>
-      <td>${d.proveedor}<span class="method-tag ${d.metodo}">${d.metodo==="deposito"?"depósito bancario":d.metodo}</span></td>
-      <td style="text-align:center;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:0.5px">${d.moneda}</td>
-      <td class="amt">${d.moneda==="USD" ? "U$D "+d.monto.toLocaleString("es-AR") : fmtARS(d.monto)}</td>
-    </tr>`).join("");
-  const totLabel = totalUSD ? `${fmtARS(totalARS)} ARS + U$D ${totalUSD.toLocaleString("es-AR")}` : `${fmtARS(totalARS)} ARS`;
-  document.getElementById("modalidadTable").innerHTML = `
-    <thead><tr><th>Proveedor</th><th style="text-align:center">Moneda</th><th style="text-align:right">Monto</th></tr></thead>
-    <tbody>
-      ${rows}
-      <tr class="totrow"><td>Total efectivo + depósitos</td><td></td><td class="amt">${totLabel}</td></tr>
-    </tbody>`;
-}
-
 function renderUrgencia(){
   const items = [
     ...TRANSFERS_POR_GIRAR.map(r=>({proveedor:r[4], categoria:"transferencia", label:"Transferencia", monto:r[3], moneda:"ARS"})),
@@ -616,7 +555,7 @@ function updateSubtitle(){
      Reconciliación completa: Historial de cheques (620 filas, $1.081.530.361 acumulado histórico) y Historial transferencias (64 filas con fecha, $49.799.232) recargados desde cero — se habían quedado 69 cheques ($97.817.390) y 7 transferencias ($3.744.000) sin cargar en actualizaciones anteriores.<br>
      6 transferencias del historial (Gas $540.000, Bayma $440.000, Peralta $896.000, Listones $90.000, Espejo $36.600, Cugat $332.000 = $2.334.600) no tienen fecha cargada en la planilla, por eso no están incluidas en el gráfico mensual — quedan pendientes de confirmar.<br>
      Cheques por girar (28 filas, $52.030.658, incluye 3 echeqs de TRV agregados el 24/08) y Transferencias por girar (7 filas, $3.520.233, todas con fecha 27/08) recalculados fila por fila desde la planilla — la lista anterior tenía "Patas camper" $1.409.400 de más (ya fue pagado el 14/08, está en el historial).<br>
-     Efectivo por girar: la planilla "Efectivo por pagar" ya no existe en el archivo → $0. Deudas y Efectivo/Depósito bancario (Neil, Wurth, Genesis vidrios, Toldos argentina, DM oleohidraulica) muestran la última foto del 29/07 sin re-verificar: esa pestaña "Deudas" también desapareció. El echeq de Wurth $4.543.838 ya figura pagado en el historial (30/08/2026) — podría estar duplicado con la fila de Deudas.<br>
+     Efectivo por girar: la planilla "Efectivo por pagar" ya no existe en el archivo → $0. Se quitaron del dashboard las tarjetas "Deudas" y "Efectivo y Depósito bancario": salían de la pestaña "Deudas", que ya no existe en el archivo y no se puede re-verificar — no corresponde mostrarlas como KPI si no se actualizan con la planilla.<br>
      La tabla "Urgencia" usa antigüedad de pedidos en Odoo calculada el 29/07 — los proveedores de Transferencias por girar todavía no fueron cruzados con Odoo, por eso figuran "s/d".<br>
      Compras internacionales (nuevo, 24/08): importación en tránsito marítimo de CNC Router, U$D 61.112 en total — mercadería U$D 32.800 (30% pagado dic-2025, 70% pagado jun-2026) + nacionalización/forwarder/despachantes U$D 28.312 (pendientes, oct-2026). Convertido a ARS con TC 1500 para nacionalización y TC 1520 para el resto, según lo indicado. No incluye Dongtai.`;
 }
@@ -627,8 +566,6 @@ function rerender(){
   renderKpis();
   renderChart();
   renderTopList();
-  renderDeudas();
-  renderModalidad();
   renderUrgencia();
 }
 
