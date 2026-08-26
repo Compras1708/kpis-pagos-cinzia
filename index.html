@@ -12,7 +12,7 @@
 <title>KPIs Pagos · Echeqs, Transferencias y Por Girar</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
 <style>
-  :root { color-scheme: light; --ech:#FB8C00; --tr:#FBC02D; --pg:#8E24AA; --trpg:#E53935; --efpg:#B71C1C; --intl:#00ACC1; --deuda:#D32F2F; --ink:#1f1f1f; --muted:#666; --line:#e5e5e5; --bg:#fafafa; }
+  :root { color-scheme: light; --ech:#FB8C00; --tr:#FBC02D; --efh:#43A047; --pg:#8E24AA; --trpg:#E53935; --efpg:#B71C1C; --intl:#00ACC1; --deuda:#D32F2F; --ink:#1f1f1f; --muted:#666; --line:#e5e5e5; --bg:#fafafa; }
   * { box-sizing: border-box; }
   body { margin: 0; padding: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
   .wrap { max-width: 1400px; margin: 0 auto; padding: 28px 32px; }
@@ -28,6 +28,7 @@
   .kpi::before { content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 4px; border-radius: 0 3px 3px 0; }
   .kpi.ech::before { background: var(--ech); }
   .kpi.tr::before { background: var(--tr); }
+  .kpi.efh::before { background: var(--efh); }
   .kpi.pg::before { background: var(--pg); }
   .kpi.trpg::before { background: var(--trpg); }
   .kpi.efpg::before { background: var(--efpg); }
@@ -112,7 +113,7 @@
 <div class="wrap">
   <header>
     <h1>📊 KPIs Pagos</h1>
-    <span class="date">Hoy: 24/8/2026</span>
+    <span class="date">Hoy: 26/8/2026</span>
     <span class="now">Mes actual: Agosto 2026</span>
   </header>
   <p class="subtitle" id="subtitle">Proyección de liquidez: echeqs + transferencias (historial) y cheques + transferencias + efectivo por girar (según fecha de pago prevista)</p>
@@ -143,15 +144,24 @@
 
     <div class="chartcard">
       <h2 id="chartTitle">Pagos por mes (fecha de pago prevista)</h2>
-      <div class="ssub">Naranja = echeqs (historial). Amarillo = transferencias (historial). Morado = cheques por girar. Rojo = transferencias por girar. Celeste = compras internacionales. Rojo oscuro = efectivo por girar (destacados para marcar urgencia).</div>
+      <div class="ssub">Naranja = echeqs (historial). Amarillo = transferencias (historial). Verde = efectivo (historial). Morado = cheques por girar. Rojo = transferencias por girar. Celeste = compras internacionales. Rojo oscuro = efectivo por girar (destacados para marcar urgencia).</div>
       <div class="chart-wrap"><canvas id="chartTotal"></canvas></div>
       <div class="legendrow">
         <div class="it"><span class="swatch" style="background:#FB8C00"></span>Echeqs (historial)</div>
         <div class="it"><span class="swatch" style="background:#FBC02D"></span>Transferencias (historial)</div>
+        <div class="it"><span class="swatch" style="background:#43A047"></span>Efectivo (historial)</div>
         <div class="it"><span class="swatch" style="background:#8E24AA"></span>Cheques por girar</div>
         <div class="it"><span class="swatch" style="background:#E53935"></span>Transferencias por girar</div>
         <div class="it"><span class="swatch" style="background:#00ACC1"></span>Compras internacionales</div>
         <div class="it"><span class="swatch" style="background:#B71C1C"></span>Efectivo por girar</div>
+      </div>
+      <div class="weekhint" id="weekHint" style="font-size:12px;color:var(--muted);margin-top:10px;">💡 Hacé click en una barra del mes para ver el desglose semanal de ese mes.</div>
+      <div class="weekbreak" id="weekBreak" style="display:none; margin-top:16px; padding-top:16px; border-top:1px solid var(--line);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <h3 id="weekBreakTitle" style="font-size:14px;font-weight:700;margin:0;"></h3>
+          <button id="weekBreakClose" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer;font-weight:600;color:#555;">Cerrar ✕</button>
+        </div>
+        <div class="chart-wrap" style="height:260px;"><canvas id="chartWeek"></canvas></div>
       </div>
     </div>
   </div>
@@ -299,17 +309,34 @@ const TRANSFERS = [
   [2026,8,14,618390,"Thinner"],[2026,8,14,66600,"Sbacco"],[2026,8,14,24500,"G y G"],[2026,8,14,1409400,"Patas camper"]
 ];
 
-// "Cheques por girar" — actualizado 24/08/2026 desde Google Sheets, con 3 filas de TRV agregadas después (28 filas, $52.030.658). Reemplaza por completo la lista anterior.
+// "Historial efectivo" — nueva pestaña agregada a la planilla (detectada 26/08/2026). Pagos en efectivo ya realizados, cargados por mes (sin día exacto) y sin año explícito.
+// Se usa el día 15 de cada mes como aproximación, y se asume año 2026 (año en curso, consistente con la fila de "Agosto"). Total: $20.439.492 (coincide con el total de la planilla).
+const EFECTIVO_HISTORIAL = [
+  [2026,1,15,4775092,"Neil"],
+  [2026,1,15,2469150,"Bibiana"],
+  [2026,1,15,1246350,"Mesadas de fibra"],
+  [2026,1,15,540000,"Distribuidora mediterranea de gas"],
+  [2026,1,15,477900,"Thinner por mayor"],
+  [2026,2,15,5920000,"Neil"],
+  [2026,8,15,3030000,"Neil"],
+  [2026,8,15,1981000,"Toldos argentina"]
+];
+
+// "Cheques por girar" — actualizado 26/08/2026 desde Google Sheets: se agregaron 13 filas nuevas (Telgomol, Rusmar, Nelson pinturas, Peusso, Experto), de 28 a 41 filas ($52.030.658 → $79.243.533). Reemplaza por completo la lista anterior.
 const POR_GIRAR = [
   [2026,9,5,670028,"Car pack"],[2026,8,26,314600,"Menapace ingenieria"],[2026,9,4,710000,"Menapace ingenieria"],[2026,9,4,3547752,"Caram"],[2026,10,4,3547752,"Caram"],
   [2026,11,4,3547752,"Caram"],[2026,9,11,2695320,"Caram"],[2026,9,26,2695320,"Caram"],[2026,8,27,288639,"Embalacor"],[2026,9,6,893738,"Alfaser"],
   [2026,9,16,893737,"Alfaser"],[2026,8,21,3194400,"Mercedes Benz"],[2026,9,15,3194400,"Mercedes Benz"],[2026,10,15,3194400,"Mercedes Benz"],[2026,11,15,3194400,"Mercedes Benz"],
   [2026,12,15,3194400,"Mercedes Benz"],[2026,9,24,1000000,"Rancagua"],[2026,8,29,621324,"Tapihouse"],[2026,9,18,1366240,"Tapihouse"],[2026,9,25,3632645,"Wurth"],
   [2026,8,28,632874,"Ingelmo Leandro"],[2026,9,20,632874,"Ingelmo Leandro"],[2026,10,20,632875,"Ingelmo Leandro"],[2026,9,6,618574,"Siccba"],[2026,9,20,618574,"Siccba"],
-  [2026,9,18,2166013,"TRV"],[2026,10,18,2166013,"TRV"],[2026,10,28,2166014,"TRV"]
+  [2026,9,18,2166013,"TRV"],[2026,10,18,2166013,"TRV"],[2026,10,28,2166014,"TRV"],
+  [2026,9,4,326669,"Telgomol"],[2026,9,10,889605,"Rusmar"],[2026,10,1,889605,"Rusmar"],[2026,9,15,889121,"Nelson pinturas"],[2026,9,9,1485859,"Peusso"],
+  [2026,9,24,1485859,"Peusso"],[2026,10,8,1485859,"Peusso"],[2026,9,10,3293383,"Experto"],[2026,9,25,3293383,"Experto"],[2026,10,10,3293383,"Experto"],
+  [2026,10,25,3293383,"Experto"],[2026,11,9,3293383,"Experto"],[2026,11,24,3293383,"Experto"]
 ];
 
 // "Transferencias por girar" — actualizado 24/08/2026 desde Google Sheets, todas con fecha 27/08/2026. Reemplaza por completo la lista anterior.
+// La planilla ahora tiene 5 filas más (26/08): Homologación $440.000, Módulo $265.000, Mesada $435.000, Mesada $360.000, alquiler CO2 $13.328 = $1.513.328 — pero ninguna tiene fecha cargada, así que no se agregan acá (no se pueden ubicar en el gráfico mensual).
 const TRANSFERS_POR_GIRAR = [
   [2026,8,27,491516,"Luces led"],[2026,8,27,490000,"PC SABRI"],[2026,8,27,725000,"Gas"],[2026,8,27,335691,"Enganches"],[2026,8,27,510000,"Peralta"],
   [2026,8,27,112026,"ND wurth"],[2026,8,27,856000,"Elasticos"]
@@ -342,7 +369,7 @@ const ODOO_ANTIGUEDAD = {
 const CURRENT_YEAR = 2026, CURRENT_MONTH = 8;
 const MONTH_NAMES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const MONTH_SHORT = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
-const COLOR_ECH = "#FB8C00", COLOR_TR = "#FBC02D", COLOR_PG = "#8E24AA", COLOR_TRPG = "#E53935", COLOR_EFPG = "#B71C1C", COLOR_INTL = "#00ACC1", GREY = "#E0E0E0";
+const COLOR_ECH = "#FB8C00", COLOR_TR = "#FBC02D", COLOR_EFH = "#43A047", COLOR_PG = "#8E24AA", COLOR_TRPG = "#E53935", COLOR_EFPG = "#B71C1C", COLOR_INTL = "#00ACC1", GREY = "#E0E0E0";
 
 function fmtARS(n){ return "$" + Math.round(n).toLocaleString("es-AR"); }
 function fmtMill(n){ if(!n) return "—"; const m=n/1e6; if(m>=10) return "$ "+m.toFixed(0)+" mill."; if(m>=1) return "$ "+m.toFixed(2).replace(".",",")+" mill."; return "$ "+(n/1000).toFixed(0)+"k"; }
@@ -355,9 +382,10 @@ function passesYear(y){ return selectedYear==="todos" || y===parseInt(selectedYe
 function passesMonth(m){ return selectedMonths.has(m); }
 
 function totalsByMonth(){
-  const out={}; for(let m=1;m<=12;m++) out[m]={ech:0,tr:0,pg:0,trpg:0,efpg:0,intl:0};
+  const out={}; for(let m=1;m<=12;m++) out[m]={ech:0,tr:0,efh:0,pg:0,trpg:0,efpg:0,intl:0};
   ECHEQS.forEach(r=>{ if(passesYear(r[0])) out[r[1]].ech+=r[3]; });
   TRANSFERS.forEach(r=>{ if(passesYear(r[0])) out[r[1]].tr+=r[3]; });
+  EFECTIVO_HISTORIAL.forEach(r=>{ if(passesYear(r[0])) out[r[1]].efh+=r[3]; });
   POR_GIRAR.forEach(r=>{ if(passesYear(r[0])) out[r[1]].pg+=r[3]; });
   TRANSFERS_POR_GIRAR.forEach(r=>{ if(passesYear(r[0])) out[r[1]].trpg+=r[3]; });
   EFECTIVO_POR_GIRAR.forEach(r=>{ if(passesYear(r[0])) out[r[1]].efpg+=r[3]; });
@@ -367,7 +395,7 @@ function totalsByMonth(){
 
 function providerTotals(){
   const t={};
-  [ECHEQS,TRANSFERS,POR_GIRAR,TRANSFERS_POR_GIRAR,EFECTIVO_POR_GIRAR,COMPRAS_INTERNACIONALES].forEach(arr=>arr.forEach(r=>{
+  [ECHEQS,TRANSFERS,EFECTIVO_HISTORIAL,POR_GIRAR,TRANSFERS_POR_GIRAR,EFECTIVO_POR_GIRAR,COMPRAS_INTERNACIONALES].forEach(arr=>arr.forEach(r=>{
     if(passesYear(r[0]) && passesMonth(r[1])) t[r[4]] = (t[r[4]]||0)+r[3];
   }));
   return t;
@@ -386,9 +414,10 @@ function renderMonthList(){
 }
 
 function renderKpis(){
-  let ech=0, tr=0, pg=0, trpg=0, efpg=0, intl=0, mesTot=0;
+  let ech=0, tr=0, efh=0, pg=0, trpg=0, efpg=0, intl=0, mesTot=0;
   ECHEQS.forEach(r=>{ if(passesYear(r[0])&&passesMonth(r[1])){ ech+=r[3]; if(r[1]===CURRENT_MONTH && r[0]===CURRENT_YEAR) mesTot+=r[3]; } });
   TRANSFERS.forEach(r=>{ if(passesYear(r[0])&&passesMonth(r[1])){ tr+=r[3]; if(r[1]===CURRENT_MONTH && r[0]===CURRENT_YEAR) mesTot+=r[3]; } });
+  EFECTIVO_HISTORIAL.forEach(r=>{ if(passesYear(r[0])&&passesMonth(r[1])){ efh+=r[3]; if(r[1]===CURRENT_MONTH && r[0]===CURRENT_YEAR) mesTot+=r[3]; } });
   POR_GIRAR.forEach(r=>{ if(passesYear(r[0])&&passesMonth(r[1])){ pg+=r[3]; if(r[1]===CURRENT_MONTH && r[0]===CURRENT_YEAR) mesTot+=r[3]; } });
   TRANSFERS_POR_GIRAR.forEach(r=>{ if(passesYear(r[0])&&passesMonth(r[1])){ trpg+=r[3]; if(r[1]===CURRENT_MONTH && r[0]===CURRENT_YEAR) mesTot+=r[3]; } });
   EFECTIVO_POR_GIRAR.forEach(r=>{ if(passesYear(r[0])&&passesMonth(r[1])){ efpg+=r[3]; if(r[1]===CURRENT_MONTH && r[0]===CURRENT_YEAR) mesTot+=r[3]; } });
@@ -397,6 +426,7 @@ function renderKpis(){
   const cards = [
     {lbl:"Total Echeqs", val:fmtMill(ech), sub:"historial de cheques", cls:"ech"},
     {lbl:"Total Transferencias", val:fmtMill(tr), sub:"ya realizadas", cls:"tr"},
+    {lbl:"Efectivo (historial)", val:fmtMill(efh), sub:"ya realizado · día aprox.", cls:"efh"},
     {lbl:"Cheques por girar", val:fmtMill(pg), sub:"pendientes de emitir", cls:"pg"},
     {lbl:"Transferencias por girar", val:fmtMill(trpg), sub:"pendientes de hacer", cls:"trpg"},
     {lbl:"Efectivo por girar", val:fmtMill(efpg), sub:"planilla \"Efectivo por pagar\" ya no existe", cls:"efpg"},
@@ -413,6 +443,7 @@ function renderChart(){
   const labels = MONTH_NAMES;
   const ech = labels.map((_,i)=>d[i+1].ech);
   const tr = labels.map((_,i)=>d[i+1].tr);
+  const efh = labels.map((_,i)=>d[i+1].efh);
   const pg = labels.map((_,i)=>d[i+1].pg);
   const trpg = labels.map((_,i)=>d[i+1].trpg);
   const efpg = labels.map((_,i)=>d[i+1].efpg);
@@ -421,6 +452,7 @@ function renderChart(){
   const datasets = [
     {label:"Echeqs", data:ech, backgroundColor:labels.map((_,i)=>dim(COLOR_ECH,i)), borderColor:"#E65100", borderWidth:0.5, stack:"s"},
     {label:"Transferencias", data:tr, backgroundColor:labels.map((_,i)=>dim(COLOR_TR,i)), borderColor:"#F57F17", borderWidth:0.5, stack:"s"},
+    {label:"Efectivo (historial)", data:efh, backgroundColor:labels.map((_,i)=>dim(COLOR_EFH,i)), borderColor:"#1B5E20", borderWidth:0.5, stack:"s"},
     {label:"Cheques por girar", data:pg, backgroundColor:labels.map((_,i)=>dim(COLOR_PG,i)), borderColor:"#4A148C", borderWidth:0.5, stack:"s"},
     {label:"Transferencias por girar", data:trpg, backgroundColor:labels.map((_,i)=>dim(COLOR_TRPG,i)), borderColor:"#B71C1C", borderWidth:0.5, stack:"s"},
     {label:"Compras internacionales", data:intl, backgroundColor:labels.map((_,i)=>dim(COLOR_INTL,i)), borderColor:"#00695C", borderWidth:0.5, stack:"s"},
@@ -434,6 +466,8 @@ function renderChart(){
     data:{labels, datasets},
     options:{
       responsive:true, maintainAspectRatio:false, interaction:{mode:"index",intersect:false},
+      onClick:(evt,elements)=>{ if(elements && elements.length){ showWeekBreakdown(elements[0].index+1); } },
+      onHover:(evt,elements)=>{ evt.native.target.style.cursor = elements.length ? "pointer" : "default"; },
       plugins:{
         tooltip:{
           backgroundColor:"#2b3540",
@@ -495,6 +529,89 @@ function renderChart(){
   });
 }
 
+function daysInMonth(year, month){ return new Date(year, month, 0).getDate(); }
+
+function weekBucketsForMonth(year, month){
+  const dim = daysInMonth(year, month);
+  const buckets = [
+    {from:1, to:7},
+    {from:8, to:14},
+    {from:15, to:21},
+    {from:22, to:28}
+  ];
+  if(dim >= 29) buckets.push({from:29, to:dim});
+  return buckets;
+}
+
+function computeWeekData(year, month){
+  const buckets = weekBucketsForMonth(year, month);
+  const data = buckets.map(function(){ return {ech:0,tr:0,efh:0,pg:0,trpg:0,efpg:0,intl:0}; });
+  function addArr(arr, key){
+    arr.forEach(function(r){
+      const y=r[0], m=r[1], d=r[2], amt=r[3];
+      if(m!==month) return;
+      if(!passesYear(y)) return;
+      for(let i=0;i<buckets.length;i++){
+        if(d>=buckets[i].from && d<=buckets[i].to){ data[i][key]+=amt; break; }
+      }
+    });
+  }
+  addArr(ECHEQS,"ech"); addArr(TRANSFERS,"tr"); addArr(EFECTIVO_HISTORIAL,"efh");
+  addArr(POR_GIRAR,"pg"); addArr(TRANSFERS_POR_GIRAR,"trpg");
+  addArr(EFECTIVO_POR_GIRAR,"efpg"); addArr(EFECTIVO_POR_GIRAR_USD,"efpg");
+  addArr(COMPRAS_INTERNACIONALES,"intl");
+  return {buckets:buckets, data:data};
+}
+
+let chartWeek;
+function showWeekBreakdown(month){
+  const year = selectedYear==="todos" ? CURRENT_YEAR : parseInt(selectedYear,10);
+  const info = computeWeekData(year, month);
+  const buckets = info.buckets, data = info.data;
+  const wlabels = buckets.map(function(b,i){ return "Sem " + (i+1) + " (" + b.from + "-" + b.to + ")"; });
+  const datasets = [
+    {label:"Echeqs", data:data.map(function(x){return x.ech;}), backgroundColor:COLOR_ECH, borderColor:"#E65100", borderWidth:0.5, stack:"s"},
+    {label:"Transferencias", data:data.map(function(x){return x.tr;}), backgroundColor:COLOR_TR, borderColor:"#F57F17", borderWidth:0.5, stack:"s"},
+    {label:"Efectivo (historial)", data:data.map(function(x){return x.efh;}), backgroundColor:COLOR_EFH, borderColor:"#1B5E20", borderWidth:0.5, stack:"s"},
+    {label:"Cheques por girar", data:data.map(function(x){return x.pg;}), backgroundColor:COLOR_PG, borderColor:"#4A148C", borderWidth:0.5, stack:"s"},
+    {label:"Transferencias por girar", data:data.map(function(x){return x.trpg;}), backgroundColor:COLOR_TRPG, borderColor:"#B71C1C", borderWidth:0.5, stack:"s"},
+    {label:"Compras internacionales", data:data.map(function(x){return x.intl;}), backgroundColor:COLOR_INTL, borderColor:"#00695C", borderWidth:0.5, stack:"s"},
+    {label:"Efectivo por girar", data:data.map(function(x){return x.efpg;}), backgroundColor:COLOR_EFPG, borderColor:"#7F0000", borderWidth:0.5, stack:"s"}
+  ];
+  const ctx = document.getElementById("chartWeek").getContext("2d");
+  if(chartWeek) chartWeek.destroy();
+  chartWeek = new Chart(ctx, {
+    type:"bar",
+    data:{labels:wlabels, datasets:datasets},
+    options:{
+      responsive:true, maintainAspectRatio:false, interaction:{mode:"index",intersect:false},
+      plugins:{
+        tooltip:{
+          backgroundColor:"#2b3540", titleColor:"#ffffff", bodyColor:"#d3dae2", footerColor:"#ffe8b3",
+          borderColor:"rgba(255,255,255,0.10)", borderWidth:1, padding:12, cornerRadius:10, boxPadding:6, usePointStyle:true,
+          callbacks:{
+            label:function(c){ return c.dataset.label+": "+fmtARS(c.parsed.y); },
+            footer:function(it){ return "Total semana: "+fmtARS(it.reduce(function(s,i){return s+i.parsed.y;},0)); }
+          }
+        }
+      },
+      scales:{
+        x:{ stacked:true, grid:{display:false}, ticks:{font:{size:11}} },
+        y:{ stacked:true, beginAtZero:true, ticks:{color:"#777", callback:function(v){return "$"+(v/1e6).toFixed(1)+"M";}, font:{size:10}}, grid:{color:"rgba(0,0,0,0.05)"} }
+      },
+      animation:{duration:300}
+    }
+  });
+  document.getElementById("weekBreakTitle").textContent = "Desglose semanal — " + MONTH_NAMES[month-1] + " " + year;
+  document.getElementById("weekBreak").style.display = "block";
+  document.getElementById("weekBreak").scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+
+function hideWeekBreakdown(){
+  document.getElementById("weekBreak").style.display = "none";
+  if(chartWeek){ chartWeek.destroy(); chartWeek = null; }
+}
+
 function renderTopList(){
   const tots = providerTotals();
   const sorted = Object.entries(tots).sort((a,b)=>b[1]-a[1]).slice(0,15);
@@ -551,16 +668,19 @@ function updateSubtitle(){
   document.getElementById("subtitle").textContent =
     `Mostrando: ${mtxt} · año ${selectedYear==="todos"?"completo":selectedYear} · echeqs + transferencias (pagados) + cheques/transferencias/efectivo por girar (a pagar, según fecha de pago prevista)`;
   document.getElementById("footerNote").innerHTML =
-    `Datos sincronizados desde Google Drive · planilla "Historial de pagos" · foto al 24/08/2026.<br>
+    `Datos sincronizados desde Google Drive · planilla "Historial de pagos" · foto al 26/08/2026.<br>
      Reconciliación completa: Historial de cheques (620 filas, $1.081.530.361 acumulado histórico) y Historial transferencias (64 filas con fecha, $49.799.232) recargados desde cero — se habían quedado 69 cheques ($97.817.390) y 7 transferencias ($3.744.000) sin cargar en actualizaciones anteriores.<br>
      6 transferencias del historial (Gas $540.000, Bayma $440.000, Peralta $896.000, Listones $90.000, Espejo $36.600, Cugat $332.000 = $2.334.600) no tienen fecha cargada en la planilla, por eso no están incluidas en el gráfico mensual — quedan pendientes de confirmar.<br>
-     Cheques por girar (28 filas, $52.030.658, incluye 3 echeqs de TRV agregados el 24/08) y Transferencias por girar (7 filas, $3.520.233, todas con fecha 27/08) recalculados fila por fila desde la planilla — la lista anterior tenía "Patas camper" $1.409.400 de más (ya fue pagado el 14/08, está en el historial).<br>
+     Cheques por girar (41 filas, $79.243.533 — se agregaron 13 filas nuevas el 26/08: Telgomol, Rusmar, Nelson pinturas, Peusso, Experto) y Transferencias por girar (7 filas con fecha, $3.520.233, todas 27/08) recalculados fila por fila desde la planilla. Transferencias por girar tiene además 5 filas nuevas sin fecha cargada (Homologación $440.000, Módulo $265.000, Mesada $435.000 + $360.000, alquiler CO2 $13.328 = $1.513.328) que no están en el gráfico hasta que se cargue la fecha.<br>
      Efectivo por girar: la planilla "Efectivo por pagar" ya no existe en el archivo → $0. Se quitaron del dashboard las tarjetas "Deudas" y "Efectivo y Depósito bancario": salían de la pestaña "Deudas", que ya no existe en el archivo y no se puede re-verificar — no corresponde mostrarlas como KPI si no se actualizan con la planilla.<br>
+     Efectivo (historial) (nuevo, 26/08): $20.439.492 en pagos ya realizados en efectivo, de la nueva pestaña "Historial efectivo" (Neil, Bibiana, Mesadas de fibra, Distribuidora mediterránea de gas, Thinner por mayor, Toldos argentina). La planilla solo carga el mes, sin día exacto — se usa el día 15 de cada mes como aproximación, y se asume año 2026 (no especificado).<br>
      La tabla "Urgencia" usa antigüedad de pedidos en Odoo calculada el 29/07 — los proveedores de Transferencias por girar todavía no fueron cruzados con Odoo, por eso figuran "s/d".<br>
-     Compras internacionales (nuevo, 24/08): importación en tránsito marítimo de CNC Router, U$D 61.112 en total — mercadería U$D 32.800 (30% pagado dic-2025, 70% pagado jun-2026) + nacionalización/forwarder/despachantes U$D 28.312 (pendientes, oct-2026). Convertido a ARS con TC 1500 para nacionalización y TC 1520 para el resto, según lo indicado. No incluye Dongtai.`;
+     Compras internacionales (24/08): importación en tránsito marítimo de CNC Router, U$D 61.112 en total — mercadería U$D 32.800 (30% pagado dic-2025, 70% pagado jun-2026) + nacionalización/forwarder/despachantes U$D 28.312 (pendientes, oct-2026). Convertido a ARS con TC 1500 para nacionalización y TC 1520 para el resto. No incluye Dongtai.<br>
+     Nuevo (26/08): hacé click en cualquier barra del gráfico mensual para ver el desglose semanal de ese mes.`;
 }
 
 function rerender(){
+  hideWeekBreakdown();
   updateSubtitle();
   renderMonthList();
   renderKpis();
@@ -579,6 +699,7 @@ document.getElementById("btnInv").addEventListener("click", ()=>{
   selectedMonths=n;
   rerender();
 });
+document.getElementById("weekBreakClose").addEventListener("click", hideWeekBreakdown);
 
 rerender();
 </script>
