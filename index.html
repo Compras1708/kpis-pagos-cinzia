@@ -113,8 +113,8 @@
 <div class="wrap">
   <header>
     <h1>📊 KPIs Pagos</h1>
-    <span class="date">Hoy: 26/8/2026</span>
-    <span class="now">Mes actual: Agosto 2026</span>
+    <span class="date">Hoy: 9/9/2026</span>
+    <span class="now" id="mesActualBadge">Mes actual: Septiembre 2026</span>
   </header>
   <p class="subtitle" id="subtitle">Proyección de liquidez: echeqs + transferencias (historial) y cheques + transferencias + efectivo por girar (según fecha de pago prevista)</p>
 
@@ -129,7 +129,7 @@
         <button id="btnNone">Ninguno</button>
       </div>
       <div class="quick-row" style="margin-top:6px; border-top:none; padding-top:0;">
-        <button id="btnNow">Solo agosto</button>
+        <button id="btnNow">Solo este mes</button>
         <button id="btnInv">Invertir</button>
       </div>
       <div class="quick-row" style="margin-top:6px; border-top:none; padding-top:0;">
@@ -274,23 +274,32 @@ const ECHEQS = [
   [2026,7,16,1500000,"Rancagua"],[2026,7,16,2044118,"Caram"],[2026,7,29,2044118,"Caram"],[2026,6,19,2044118,"Caram"],[2026,6,20,338800,"Welter"],[2026,7,17,1264600,"Avin ice"],
   [2026,6,19,1612067,"Experto"],[2026,7,3,1612067,"Experto"],[2026,7,18,1612067,"Experto"],[2026,8,2,1612067,"Experto"],[2026,8,17,1612067,"Experto"],[2026,6,29,5052680,"Wurth"],
   [2026,7,22,1200000,"Todo fer"],[2026,7,24,2394898,"Marco Aurelio Sosa"],[2026,8,24,2394897,"Marco Aurelio Sosa"],[2026,9,24,2394897,"Marco Aurelio Sosa"],[2026,10,24,2394897,"Marco Aurelio Sosa"],[2026,7,14,540000,"Mauro trovatto"],
-  [2026,7,30,540000,"Mauro trovatto"],[2026,7,2,3574598,"Toldos argentina"],[2026,7,29,460295,"Proyectando"],[2026,8,13,460294,"Proyectando"],[2026,7,25,2991863,"TRV"],[2026,8,25,2991862,"TRV"],
-  [2026,9,10,2991862,"TRV"],[2026,7,17,218000,"Cattaneo"],[2026,7,18,2044121,"Caram"],[2026,7,24,1400393,"Caram"],[2026,8,12,1400393,"Caram"],[2026,8,13,1000000,"Dintra"],
-  [2026,8,1,1302308,"Alfaser"],[2026,7,18,1032026,"Tapihouse"],[2026,7,30,1264600,"Avin ice"],[2026,8,10,1440000,"Cattaneo"],[2026,9,10,1440000,"Cattaneo"],[2026,10,10,1440000,"Cattaneo"],
-  [2026,7,24,1304623,"Nelson pinturas"],[2026,8,7,534426,"Ausili"],[2026,8,10,826464,"Embalacor"],[2025,12,12,732775,"Malkoni"],[2025,12,12,732775,"Malkoni"],[2026,7,27,1305210,"Flojumar"],
-  [2026,7,23,369332,"Siccba"],[2026,7,28,369332,"Siccba"],[2026,8,13,369332,"Siccba"],[2026,7,10,1762075,"Caram"],[2026,7,25,1762075,"Caram"],[2026,8,10,1762075,"Caram"],
-  [2026,8,25,1762074,"Caram"],[2026,9,10,1762074,"Caram"],[2026,8,17,3128702,"Richetta"],[2026,8,30,831916,"Cáceres"],[2026,8,15,831916,"Cáceres"],[2026,8,9,972173,"Tapihouse"],
-  [2026,9,29,1002101,"Tapihouse"],[2026,8,30,4543838,"Wurth"],[2026,9,10,972885,"Wurth"],[2026,8,1,1305590,"Wurth"],[2026,8,10,4006478,"Wurth"],[2026,9,1,2166354,"TRV"],
-  [2026,10,1,2166355,"TRV"],[2026,10,10,2166354,"TRV"],[2026,9,1,1597097,"Argenpur"],[2026,10,1,1597096,"Argenpur"],[2026,8,24,1604945,"Nelson pinturas"],[2026,8,7,827292,"Proyectando"],
-  [2026,8,20,598458,"Hissuma"],[2026,9,5,598458,"Hissuma"],[2026,9,20,598459,"Hissuma"],[2026,9,19,1200000,"Dintra"],[2026,9,4,2333334,"Flojumar"],[2026,10,4,2333333,"Flojumar"],
-  [2026,11,4,2333333,"Flojumar"],[2026,8,20,288877,"Lagos"],[2026,8,14,523787,"Greendeco"],[2026,8,20,576000,"Mesadas fibras"],[2026,8,19,402394,"Gurú store"],[2026,8,19,241077,"Ipipsa"],
-  [2026,8,24,241077,"Ipipsa"],[2026,8,19,1114271,"Resinfibras"],[2026,8,24,1114271,"Resinfibras"],[2026,8,19,314650,"Legitel"],[2026,8,19,402394,"Gurú store"],[2026,8,20,725000,"Distribuidora de gas"],
-  [2026,8,20,1035495,"Asia"],[2026,8,19,421988,"CNC insumos"],[2026,8,20,1152000,"Los gallegos"],[2026,8,19,234355,"Flojumar"],[2026,8,19,200000,"Cattaneo"],[2026,8,15,1000000,"Dintra"],
-  [2026,8,12,724252,"Textiles del suquia"],[2026,8,15,724252,"Textiles del suquia"],[2026,9,10,1200000,"Todo fer"],[2026,9,4,1000000,"Rancagua"],[2026,9,10,2388629,"Richetta"],[2026,8,25,325025,"Sbacco"],
-  [2026,8,31,1330800,"Avin ice"],[2026,8,29,1157594,"Car pack"],[2026,8,17,2795176,"Experto"],[2026,8,19,2795176,"Experto"],[2026,8,22,2795176,"Experto"],[2026,8,30,2795175,"Experto"],
-  [2026,9,14,2795175,"Experto"],[2026,10,1,2795175,"Experto"],[2026,9,12,2284666,"Mecanizados san miguel"],[2026,10,12,2284666,"Mecanizados san miguel"],[2026,8,25,749291,"Alpross"],[2026,8,26,337625,"Rola gases"],
-  [2026,8,20,770000,"Mauro trovato"],[2026,9,1,770000,"Mauro trovato"],[2026,8,18,598458,"Hissuma"],[2026,9,3,598458,"Hissuma"],[2026,9,14,598458,"Hissuma"],[2026,9,14,1254006,"Flojumar"],
-  [2026,10,30,1254006,"Flojumar"],[2026,11,14,1254005,"Flojumar"]
+  [2026,7,30,540000,"Mauro trovatto"],[2026,7,2,3574598,"Toldos argentina"],[2026,7,29,460295,"Proyectando"],[2026,8,13,460294,"Proyectando"],[2026,7,25,2991863,"TRV"],[2026,9,10,2991862,"TRV"],
+  [2026,7,17,218000,"Cattaneo"],[2026,7,18,2044121,"Caram"],[2026,7,24,1400393,"Caram"],[2026,8,12,1400393,"Caram"],[2026,8,13,1000000,"Dintra"],[2026,8,1,1302308,"Alfaser"],
+  [2026,7,18,1032026,"Tapihouse"],[2026,7,30,1264600,"Avin ice"],[2026,8,10,1440000,"Cattaneo"],[2026,9,10,1440000,"Cattaneo"],[2026,10,10,1440000,"Cattaneo"],[2026,7,24,1304623,"Nelson pinturas"],
+  [2026,8,7,534426,"Ausili"],[2026,8,10,826464,"Embalacor"],[2025,12,12,732775,"Malkoni"],[2025,12,12,732775,"Malkoni"],[2026,7,27,1305210,"Flojumar"],[2026,7,23,369332,"Siccba"],
+  [2026,7,28,369332,"Siccba"],[2026,8,13,369332,"Siccba"],[2026,7,10,1762075,"Caram"],[2026,7,25,1762075,"Caram"],[2026,8,10,1762075,"Caram"],[2026,8,25,1762074,"Caram"],
+  [2026,9,10,1762074,"Caram"],[2026,8,17,3128702,"Richetta"],[2026,8,30,831916,"Cáceres"],[2026,8,15,831916,"Cáceres"],[2026,8,9,972173,"Tapihouse"],[2026,9,29,1002101,"Tapihouse"],
+  [2026,8,30,4543838,"Wurth"],[2026,9,10,972885,"Wurth"],[2026,8,1,1305590,"Wurth"],[2026,8,10,4006478,"Wurth"],[2026,9,1,2166354,"TRV"],[2026,10,1,2166355,"TRV"],
+  [2026,10,10,2166354,"TRV"],[2026,9,1,1597097,"Argenpur"],[2026,10,1,1597096,"Argenpur"],[2026,8,24,1604945,"Nelson pinturas"],[2026,8,7,827292,"Proyectando"],[2026,8,20,598458,"Hissuma"],
+  [2026,9,5,598458,"Hissuma"],[2026,9,20,598459,"Hissuma"],[2026,9,19,1200000,"Dintra"],[2026,9,4,2333334,"Flojumar"],[2026,10,4,2333333,"Flojumar"],[2026,11,4,2333333,"Flojumar"],
+  [2026,8,20,288877,"Lagos"],[2026,8,14,523787,"Greendeco"],[2026,8,20,576000,"Mesadas fibras"],[2026,8,19,402394,"Gurú store"],[2026,8,19,241077,"Ipipsa"],[2026,8,24,241077,"Ipipsa"],
+  [2026,8,19,1114271,"Resinfibras"],[2026,8,24,1114271,"Resinfibras"],[2026,8,19,314650,"Legitel"],[2026,8,19,402394,"Gurú store"],[2026,8,20,725000,"Distribuidora de gas"],[2026,8,20,1035495,"Asia"],
+  [2026,8,19,421988,"CNC insumos"],[2026,8,20,1152000,"Los gallegos"],[2026,8,19,234355,"Flojumar"],[2026,8,19,200000,"Cattaneo"],[2026,8,15,1000000,"Dintra"],[2026,8,12,724252,"Textiles del suquia"],
+  [2026,8,15,724252,"Textiles del suquia"],[2026,9,10,1200000,"Todo fer"],[2026,9,4,1000000,"Rancagua"],[2026,9,10,2388629,"Richetta"],[2026,8,25,325025,"Sbacco"],[2026,8,31,1330800,"Avin ice"],
+  [2026,8,29,1157594,"Car pack"],[2026,8,17,2795176,"Experto"],[2026,8,19,2795176,"Experto"],[2026,8,22,2795176,"Experto"],[2026,8,30,2795175,"Experto"],[2026,9,14,2795175,"Experto"],
+  [2026,10,1,2795175,"Experto"],[2026,9,12,2284666,"Mecanizados san miguel"],[2026,10,12,2284666,"Mecanizados san miguel"],[2026,8,25,749291,"Alpross"],[2026,8,26,337625,"Rola gases"],[2026,8,20,770000,"Mauro trovato"],
+  [2026,9,1,770000,"Mauro trovato"],[2026,8,18,598458,"Hissuma"],[2026,9,3,598458,"Hissuma"],[2026,9,14,598458,"Hissuma"],[2026,9,14,1254006,"Flojumar"],[2026,10,30,1254006,"Flojumar"],
+  [2026,11,14,1254005,"Flojumar"],[2026,9,5,1154567,"Car pack"],[2026,8,26,314600,"Menapace ingenieria"],[2026,9,4,3547752,"Caram"],[2026,10,4,3547752,"Caram"],[2026,11,4,3547752,"Caram"],
+  [2026,9,11,2695320,"Caram"],[2026,9,26,2695320,"Caram"],[2026,8,27,288639,"Embalacor"],[2026,9,6,893738,"Alfaser"],[2026,9,16,893737,"Alfaser"],[2026,8,21,3194400,"Mercedes Benz"],
+  [2026,9,15,3194400,"Mercedes Benz"],[2026,10,15,3194400,"Mercedes Benz"],[2026,11,15,3194400,"Mercedes Benz"],[2026,12,15,3194400,"Mercedes Benz"],[2026,9,24,1000000,"Rancagua"],[2026,8,28,632874,"Ingelmo Leandro"],
+  [2026,9,20,632874,"Ingelmo Leandro"],[2026,10,20,632875,"Ingelmo Leandro"],[2026,9,18,2166013,"TRV"],[2026,10,18,2166013,"TRV"],[2026,10,28,2166014,"TRV"],[2026,9,4,326669,"Telgomol"],
+  [2026,9,9,1485859,"Peusso"],[2026,9,24,1485859,"Peusso"],[2026,10,8,1485859,"Peusso"],[2026,9,11,901841,"Peusso"],[2026,9,28,901841,"Peusso"],[2026,10,12,901841,"Peusso"],
+  [2026,9,26,1000000,"Dintra"],[2026,9,10,1000000,"Todo fer"],[2026,9,17,348000,"Cattaneo"],[2026,9,11,670028,"Car pack"],[2026,9,2,621324,"Tapihouse"],[2026,9,18,1366240,"Tapihouse"],
+  [2026,9,25,3632645,"Wurth"],[2026,9,22,889121,"Nelson pinturas"],[2026,9,30,1168014,"Ausili"],[2026,9,6,618574,"Siccba"],[2026,9,20,618574,"Siccba"],[2026,9,20,515460,"Roer"],
+  [2026,9,16,852687,"CNC insumos"],[2026,9,5,184955,"Malkoni"],[2026,9,5,1726891,"Argenpur"],[2026,10,5,1726891,"Argenpur"],[2026,11,5,1726891,"Argenpur"],[2026,11,20,1726891,"Argenpur"],
+  [2026,9,3,2822899,"Experto"],[2026,9,12,2822899,"Experto"],[2026,9,30,2822899,"Experto"],[2026,10,15,2822899,"Experto"],[2026,10,30,2822899,"Experto"],[2026,11,15,2822899,"Experto"],
+  [2026,11,30,2822899,"Experto"]
 ];
 
 const TRANSFERS = [
@@ -306,11 +315,12 @@ const TRANSFERS = [
   [2026,7,6,175000,"Rototech"],[2026,7,6,190800,"Unicom"],[2026,7,6,262776.45,"Alfaser"],[2026,7,6,414000,"AMP"],[2026,7,6,673000,"Mesadas"],
   [2026,7,24,253900,"Espejos"],[2026,7,24,375000,"ESPEJOpvc"],[2026,8,14,761890,"Luces"],[2026,8,14,60000,"Zincados"],[2026,8,14,1062000,"Peralta"],
   [2026,8,14,1665000,"Rototech"],[2026,8,14,254400,"Perillas"],[2026,8,14,216000,"Espejo"],[2026,8,14,816750,"Legitel"],[2026,8,14,145200,"Cugat"],
-  [2026,8,14,618390,"Thinner"],[2026,8,14,66600,"Sbacco"],[2026,8,14,24500,"G y G"],[2026,8,14,1409400,"Patas camper"]
+  [2026,8,14,618390,"Thinner"],[2026,8,14,66600,"Sbacco"],[2026,8,14,255625.43,"G y G"],[2026,8,14,1409400,"Patas camper"],[2026,8,14,725000,"Gas"],
+  [2026,9,1,491516,"LUBOX"],[2026,9,1,160000,"Listones"],[2026,9,1,234000,"GUAYABI"],[2026,9,1,216000,"Espejo"],[2026,9,10,220000,"Bayma"]
 ];
 
-// "Historial efectivo" — nueva pestaña agregada a la planilla (detectada 26/08/2026). Pagos en efectivo ya realizados, cargados por mes (sin día exacto) y sin año explícito.
-// Se usa el día 15 de cada mes como aproximación, y se asume año 2026 (año en curso, consistente con la fila de "Agosto"). Total: $20.439.492 (coincide con el total de la planilla).
+// "Historial efectivo" — pestaña de la planilla con pagos en efectivo ya realizados, cargados por mes (sin día exacto) pero con año explícito en la columna "Año" (2026 para todas las filas cargadas).
+// Se usa el día 15 de cada mes como aproximación al no tener día exacto. Total: $20.439.492 (coincide con el total de la planilla). Releído 09/09/2026, sin cambios.
 const EFECTIVO_HISTORIAL = [
   [2026,1,15,4775092,"Neil"],
   [2026,1,15,2469150,"Bibiana"],
@@ -322,24 +332,22 @@ const EFECTIVO_HISTORIAL = [
   [2026,8,15,1981000,"Toldos argentina"]
 ];
 
-// "Cheques por girar" — actualizado 26/08/2026 desde Google Sheets: se agregaron 13 filas nuevas (Telgomol, Rusmar, Nelson pinturas, Peusso, Experto), de 28 a 41 filas ($52.030.658 → $79.243.533). Reemplaza por completo la lista anterior.
+// "Cheques por girar" — releído 09/09/2026 desde Google Sheets. Lista completamente distinta a la sincronización anterior: la mayoría de los cheques que antes figuraban acá (Telgomol, Rusmar, Nelson pinturas, Peusso, Experto, etc.) ya fueron emitidos y ahora aparecen en "Historial de cheques" (ECHEQS) aunque tengan fecha de pago futura — eso es normal, un echeq ya entregado sigue siendo un pago comprometido. 28 filas, $27.724.770.
+// Corrección aplicada: fila "Todo fer" $558.324 tenía fecha "09/10/2025" en la planilla (año imposible para un cheque a girar) — se interpreta como error de tipeo y se corrige a 09/10/2026.
 const POR_GIRAR = [
-  [2026,9,5,670028,"Car pack"],[2026,8,26,314600,"Menapace ingenieria"],[2026,9,4,710000,"Menapace ingenieria"],[2026,9,4,3547752,"Caram"],[2026,10,4,3547752,"Caram"],
-  [2026,11,4,3547752,"Caram"],[2026,9,11,2695320,"Caram"],[2026,9,26,2695320,"Caram"],[2026,8,27,288639,"Embalacor"],[2026,9,6,893738,"Alfaser"],
-  [2026,9,16,893737,"Alfaser"],[2026,8,21,3194400,"Mercedes Benz"],[2026,9,15,3194400,"Mercedes Benz"],[2026,10,15,3194400,"Mercedes Benz"],[2026,11,15,3194400,"Mercedes Benz"],
-  [2026,12,15,3194400,"Mercedes Benz"],[2026,9,24,1000000,"Rancagua"],[2026,8,29,621324,"Tapihouse"],[2026,9,18,1366240,"Tapihouse"],[2026,9,25,3632645,"Wurth"],
-  [2026,8,28,632874,"Ingelmo Leandro"],[2026,9,20,632874,"Ingelmo Leandro"],[2026,10,20,632875,"Ingelmo Leandro"],[2026,9,6,618574,"Siccba"],[2026,9,20,618574,"Siccba"],
-  [2026,9,18,2166013,"TRV"],[2026,10,18,2166013,"TRV"],[2026,10,28,2166014,"TRV"],
-  [2026,9,4,326669,"Telgomol"],[2026,9,10,889605,"Rusmar"],[2026,10,1,889605,"Rusmar"],[2026,9,15,889121,"Nelson pinturas"],[2026,9,9,1485859,"Peusso"],
-  [2026,9,24,1485859,"Peusso"],[2026,10,8,1485859,"Peusso"],[2026,9,10,3293383,"Experto"],[2026,9,25,3293383,"Experto"],[2026,10,10,3293383,"Experto"],
-  [2026,10,25,3293383,"Experto"],[2026,11,9,3293383,"Experto"],[2026,11,24,3293383,"Experto"]
+  [2026,9,4,710000,"Menapace ingenieria"],[2026,9,10,889605,"Rusmar"],[2026,10,1,889605,"Rusmar"],[2026,9,25,1076863,"Cáceres ferretería"],[2026,9,28,965630,"Fag sistems"],
+  [2026,9,9,287016,"Proyectando"],[2026,9,18,287016,"Proyectando"],[2026,10,3,287016,"Proyectando"],[2026,10,18,287016,"Proyectando"],[2026,9,25,770000,"Mauro trovato"],
+  [2026,10,10,770000,"Mauro trovato"],[2026,9,20,250505,"Rola gases"],[2026,10,2,541248,"Embalacor"],[2026,10,9,1000000,"Rancagua"],[2026,9,25,677248,"Textiles del suquía"],
+  [2026,10,10,677248,"Textiles del suquía"],[2026,10,25,677248,"Textiles del suquía"],[2026,9,15,490000,"Flojumar"],[2026,9,16,375102,"Telgomol"],[2026,10,10,718200,"Monrtegoma"],
+  [2026,10,4,3938920,"Caram"],[2026,11,5,3938920,"Caram"],[2026,12,5,3938920,"Caram"],[2026,9,28,347086,"Tapihouse"],[2026,10,8,1388587,"Tapihouse"],
+  [2026,10,9,558324,"Todo fer"],[2026,10,1,237318,"Malkoni"],[2026,10,3,750129,"Richetta"]
 ];
 
-// "Transferencias por girar" — actualizado 24/08/2026 desde Google Sheets, todas con fecha 27/08/2026. Reemplaza por completo la lista anterior.
-// La planilla ahora tiene 5 filas más (26/08): Homologación $440.000, Módulo $265.000, Mesada $435.000, Mesada $360.000, alquiler CO2 $13.328 = $1.513.328 — pero ninguna tiene fecha cargada, así que no se agregan acá (no se pueden ubicar en el gráfico mensual).
+// "Transferencias por girar" — releído 09/09/2026 desde Google Sheets. 15 filas, todas con fecha 10/09/2026, $6.058.973,97. Reemplaza por completo la lista anterior.
 const TRANSFERS_POR_GIRAR = [
-  [2026,8,27,491516,"Luces led"],[2026,8,27,490000,"PC SABRI"],[2026,8,27,725000,"Gas"],[2026,8,27,335691,"Enganches"],[2026,8,27,510000,"Peralta"],
-  [2026,8,27,112026,"ND wurth"],[2026,8,27,856000,"Elasticos"]
+  [2026,9,10,490000,"PC SABRI"],[2026,9,10,65000,"PC AGUS"],[2026,9,10,85037,"Enganches"],[2026,9,10,112026,"ND wurth"],[2026,9,10,856000,"Elasticos"],
+  [2026,9,10,265000,"Módulo"],[2026,9,10,435000,"Mesada"],[2026,9,10,360000,"Mesada"],[2026,9,10,307000,"Mesada"],[2026,9,10,686675.97,"Borneras"],
+  [2026,9,10,443260,"Portafusi"],[2026,9,10,540000,"Ploteado"],[2026,9,10,402000,"G y G"],[2026,9,10,471975,"Legitel"],[2026,9,10,540000,"Gas"]
 ];
 
 // "Efectivo por pagar" — la pestaña ya no existe en la planilla (confirmado 24/08/2026, tras haberla visto vacía el 19/08). No hay forma de verificar montos pendientes.
@@ -348,15 +356,21 @@ const EFECTIVO_POR_GIRAR = [
 const EFECTIVO_POR_GIRAR_USD = [
 ];
 
-// "Compras internacionales" — importación en tránsito marítimo del proveedor CNC Router (planilla aparte, no en "Historial de pagos").
-// Montos originales en USD convertidos a ARS: nacionalización a TC 1500, el resto (mercadería 30%+70%, forwarder, despachantes) a TC 1520.
-// Total USD: U$D 61.112 (mercadería U$D 32.800 ya pagada dic-2025/jun-2026 + logística U$D 28.312 pendiente). Nota: la planilla muestra un total de logística de $28.312,15 pero los 3 conceptos visibles suman $28.312,00 — diferencia de U$D 0,15 sin identificar, no afecta el cálculo de forma relevante.
+// "Compras internacionales" — importación en tránsito marítimo del proveedor CNC Router (planilla aparte, no en "Historial de pagos"), releída 09/09/2026.
+// Montos originales en USD convertidos a ARS: nacionalización a TC 1500, el resto (mercadería 30%+70%, forwarder, despachante) a TC 1520.
+// Mercadería (30%+70%, U$D 32.800) ya pagada dic-2025/jun-2026. Logística pendiente: nacionalización U$D 17.763,2 + forwarder U$D 9.850 + despachante U$D 699 = U$D 28.312,2.
+// Se agregan 2 conceptos nuevos en ARS (ya no en USD, no requieren conversión): Camión $500.000 (1/10/2026) y Depósito fiscal Malvinas $1.342.031 (30/10/2026) — logística asociada al mismo despacho de CNC Router.
+// Dongtai: la planilla registra una factura de U$D 48.500 dividida 30%/70%. Por indicación del usuario se incluye SOLO el 30% (U$D 13.720 × TC1520 = $20.854.400); el 70% (U$D 34.780, fecha 1/9/2026) se deja fuera.
+// OJO: la fecha del 30% de Dongtai figura en la planilla como "1/5/2026" pero con la nota "Analizando fecha de pago" — es decir, la fecha de pago todavía NO está confirmada. Se usa tal cual figura en la planilla; avisar si se define una fecha distinta.
 const COMPRAS_INTERNACIONALES = [
   [2025,12,28,17328000,"CNC Router - Mercadería 30%"],
   [2026,6,18,32528000,"CNC Router - Mercadería 70%"],
   [2026,9,29,14972000,"CNC Router - Forwarder"],
-  [2026,10,1,26644500,"CNC Router - Nacionalización"],
-  [2026,10,15,1062480,"CNC Router - Despachante"]
+  [2026,10,1,26644800,"CNC Router - Nacionalización"],
+  [2026,10,15,1062480,"CNC Router - Despachante"],
+  [2026,10,1,500000,"CNC Router - Camión"],
+  [2026,10,30,1342031,"CNC Router - Depósito fiscal Malvinas"],
+  [2026,5,1,20854400,"Dongtai - Pago 30% (fecha sin confirmar)"]
 ];
 
 // Antigüedad del pedido en Odoo ("Fecha límite de pedido" = date_order), en días, al 29/07/2026.
@@ -366,7 +380,7 @@ const ODOO_ANTIGUEDAD = {
   "Cugat":166, "Legitel":154, "Asia":134, "Avin ice":102
 };
 
-const CURRENT_YEAR = 2026, CURRENT_MONTH = 8;
+const CURRENT_YEAR = 2026, CURRENT_MONTH = 9;
 const MONTH_NAMES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const MONTH_SHORT = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 const COLOR_ECH = "#FB8C00", COLOR_TR = "#FBC02D", COLOR_EFH = "#43A047", COLOR_PG = "#8E24AA", COLOR_TRPG = "#E53935", COLOR_EFPG = "#B71C1C", COLOR_INTL = "#00ACC1", GREY = "#E0E0E0";
@@ -430,8 +444,8 @@ function renderKpis(){
     {lbl:"Cheques por girar", val:fmtMill(pg), sub:"pendientes de emitir", cls:"pg"},
     {lbl:"Transferencias por girar", val:fmtMill(trpg), sub:"pendientes de hacer", cls:"trpg"},
     {lbl:"Efectivo por girar", val:fmtMill(efpg), sub:"planilla \"Efectivo por pagar\" ya no existe", cls:"efpg"},
-    {lbl:"Compras internacionales", val:fmtMill(intl), sub:"CNC Router · U$D 61.112 (TC 1500/1520)", cls:"intl"},
-    {lbl:"Agosto (mes actual)", val:fmtMill(mesTot), sub:"todas las categorías", cls:"total"},
+    {lbl:"Compras internacionales", val:fmtMill(intl), sub:"CNC Router + Dongtai 30% · U$D 74.832 (TC 1500/1520)", cls:"intl"},
+    {lbl:MONTH_NAMES[CURRENT_MONTH-1]+" (mes actual)", val:fmtMill(mesTot), sub:"todas las categorías", cls:"total"},
     {lbl:"Total a desembolsar", val:fmtMill(totPorGirar), sub:"cheques + transf. + efectivo por girar", cls:"total"}
   ];
   document.getElementById("kpis").innerHTML = cards.map(c=>`<div class="kpi ${c.cls}"><div class="lbl">${c.lbl}</div><div class="val">${c.val}</div><div class="sub">${c.sub}</div></div>`).join("");
@@ -485,7 +499,7 @@ function renderChart(){
           footerFont:{size:12, weight:700},
           footerMarginTop:8,
           callbacks:{
-            title:(it)=>it[0].label + (it[0].label==="Agosto"?"  ← MES ACTUAL":""),
+            title:(it)=>it[0].label + (it[0].label===MONTH_NAMES[CURRENT_MONTH-1]?"  ← MES ACTUAL":""),
             label:(c)=>c.dataset.label+": "+fmtARS(c.parsed.y),
             footer:(it)=>"Total mes: "+fmtARS(it.reduce((s,i)=>s+i.parsed.y,0))
           }
@@ -495,8 +509,8 @@ function renderChart(){
         x:{
           stacked:true,
           ticks:{
-            color:(ctx)=>ctx.index===7?"#E65100":"#444",
-            font:(ctx)=>({size:12, weight:ctx.index===7?700:500})
+            color:(ctx)=>ctx.index===(CURRENT_MONTH-1)?"#E65100":"#444",
+            font:(ctx)=>({size:12, weight:ctx.index===(CURRENT_MONTH-1)?700:500})
           },
           grid:{display:false}
         },
@@ -520,7 +534,7 @@ function renderChart(){
           if(!tot) return;
           const xPx = chart.getDatasetMeta(0).data[i].x;
           const yPx = y.getPixelForValue(tot);
-          ctx.fillStyle = i===7 ? "#E65100" : "#333";
+          ctx.fillStyle = i===(CURRENT_MONTH-1) ? "#E65100" : "#333";
           ctx.fillText(fmtMillShort(tot), xPx, yPx - 6);
         });
         ctx.restore();
@@ -668,15 +682,17 @@ function updateSubtitle(){
   document.getElementById("subtitle").textContent =
     `Mostrando: ${mtxt} · año ${selectedYear==="todos"?"completo":selectedYear} · echeqs + transferencias (pagados) + cheques/transferencias/efectivo por girar (a pagar, según fecha de pago prevista)`;
   document.getElementById("footerNote").innerHTML =
-    `Datos sincronizados desde Google Drive · planilla "Historial de pagos" · foto al 26/08/2026.<br>
-     Reconciliación completa: Historial de cheques (620 filas, $1.081.530.361 acumulado histórico) y Historial transferencias (64 filas con fecha, $49.799.232) recargados desde cero — se habían quedado 69 cheques ($97.817.390) y 7 transferencias ($3.744.000) sin cargar en actualizaciones anteriores.<br>
-     6 transferencias del historial (Gas $540.000, Bayma $440.000, Peralta $896.000, Listones $90.000, Espejo $36.600, Cugat $332.000 = $2.334.600) no tienen fecha cargada en la planilla, por eso no están incluidas en el gráfico mensual — quedan pendientes de confirmar.<br>
-     Cheques por girar (41 filas, $79.243.533 — se agregaron 13 filas nuevas el 26/08: Telgomol, Rusmar, Nelson pinturas, Peusso, Experto) y Transferencias por girar (7 filas con fecha, $3.520.233, todas 27/08) recalculados fila por fila desde la planilla. Transferencias por girar tiene además 5 filas nuevas sin fecha cargada (Homologación $440.000, Módulo $265.000, Mesada $435.000 + $360.000, alquiler CO2 $13.328 = $1.513.328) que no están en el gráfico hasta que se cargue la fecha.<br>
-     Efectivo por girar: la planilla "Efectivo por pagar" ya no existe en el archivo → $0. Se quitaron del dashboard las tarjetas "Deudas" y "Efectivo y Depósito bancario": salían de la pestaña "Deudas", que ya no existe en el archivo y no se puede re-verificar — no corresponde mostrarlas como KPI si no se actualizan con la planilla.<br>
-     Efectivo (historial) (nuevo, 26/08): $20.439.492 en pagos ya realizados en efectivo, de la nueva pestaña "Historial efectivo" (Neil, Bibiana, Mesadas de fibra, Distribuidora mediterránea de gas, Thinner por mayor, Toldos argentina). La planilla solo carga el mes, sin día exacto — se usa el día 15 de cada mes como aproximación, y se asume año 2026 (no especificado).<br>
-     La tabla "Urgencia" usa antigüedad de pedidos en Odoo calculada el 29/07 — los proveedores de Transferencias por girar todavía no fueron cruzados con Odoo, por eso figuran "s/d".<br>
-     Compras internacionales (24/08): importación en tránsito marítimo de CNC Router, U$D 61.112 en total — mercadería U$D 32.800 (30% pagado dic-2025, 70% pagado jun-2026) + nacionalización/forwarder/despachantes U$D 28.312 (pendientes, oct-2026). Convertido a ARS con TC 1500 para nacionalización y TC 1520 para el resto. No incluye Dongtai.<br>
-     Nuevo (26/08): hacé click en cualquier barra del gráfico mensual para ver el desglose semanal de ese mes.`;
+    `Datos sincronizados desde Google Drive · planilla "Historial de pagos" · foto al 09/09/2026 — reconstrucción completa de todas las categorías con foco en fechas de desembolso.<br>
+     Historial de cheques (673 filas, $1.171.129.587) y Historial de transferencias (70 filas con fecha, $52.076.873,65) recargados desde cero. Se excluyó 1 echeq de T.R.V por $2.991.862 (25/08/2026) marcado en la planilla como "cancelado" — nunca se desembolsó.<br>
+     Importante: el Historial de cheques ahora incluye varios echeqs con fecha de pago en septiembre/octubre/noviembre 2026 — son cheques YA emitidos (por eso están en el "historial" y no en "por girar"), aunque su cobro efectivo sea en el futuro. Es normal y así lo indicó el usuario.<br>
+     6 transferencias del historial (Gas $540.000, Bayma $440.000, Peralta $896.000, Listones $90.000, Espejo $36.600, Cugat $332.000 = $2.334.600) siguen sin fecha cargada en la planilla — no están incluidas en el gráfico mensual.<br>
+     Cheques por girar (28 filas, $27.724.770) y Transferencias por girar (15 filas, todas con fecha 10/09/2026, $6.058.973,97) recalculados fila por fila desde cero — la lista de cheques por girar cambió casi por completo respecto a la sincronización anterior porque muchos ya fueron emitidos (ver nota arriba). Corrección aplicada: un cheque de "Todo fer" por $558.324 tenía año "2025" en la planilla (imposible para un cheque a girar) — se corrigió a 2026.<br>
+     Efectivo por girar: la planilla "Efectivo por pagar" ya no existe en el archivo → $0. Tarjetas "Deudas" y "Efectivo y Depósito bancario" siguen sin mostrarse por no tener pestaña de origen verificable.<br>
+     Efectivo (historial): $20.439.492 en pagos ya realizados en efectivo (Neil, Bibiana, Mesadas de fibra, Distribuidora mediterránea de gas, Thinner por mayor, Toldos argentina), sin cambios respecto a la sincronización anterior. La planilla carga el mes con año explícito (2026) pero sin día exacto — se usa el día 15 de cada mes como aproximación.<br>
+     La tabla "Urgencia" usa antigüedad de pedidos en Odoo calculada el 29/07 (no actualizada en esta sincronización) — los proveedores de Transferencias por girar todavía no fueron cruzados con Odoo, por eso figuran "s/d".<br>
+     Compras internacionales: importación de CNC Router (mercadería U$D 32.800 ya pagada dic-2025/jun-2026 + logística U$D 28.312,2 pendiente entre sep-oct 2026) más 2 conceptos nuevos en ARS de la misma operación — Camión $500.000 (1/10) y Depósito fiscal Malvinas $1.342.031 (30/10). Convertido con TC 1500 para nacionalización y TC 1520 para el resto en USD.<br>
+     Se agregó además el pago del 30% de Dongtai (U$D 13.720 × TC 1520 = $20.854.400), por indicación del usuario — el 70% restante (U$D 34.780) queda excluido. <b>Ojo:</b> la fecha de este pago figura en la planilla como 1/5/2026 pero con la nota "Analizando fecha de pago" (fecha aún no confirmada) — se usó tal cual está cargada; avisar si corresponde otra fecha.<br>
+     Hacé click en cualquier barra del gráfico mensual para ver el desglose semanal de ese mes.`;
 }
 
 function rerender(){
