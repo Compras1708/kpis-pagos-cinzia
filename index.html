@@ -174,6 +174,14 @@
     <div class="top-list" id="topList"></div>
   </div>
 
+  <div class="deudascard" style="border-left:4px solid #00838F;">
+    <header>
+      <h2>💰 Mayores pagos pendientes — Compras internacionales (CNC Router + Dongtai)</h2>
+      <span class="dsub">Los montos más altos "por girar" del dashboard. Ordenados de mayor a menor. No incluye lo ya pagado (mercadería 30%/70% de CNC Router, dic-2025 y jun-2026).</span>
+    </header>
+    <table class="deudas-table" id="grandesPagosTable"></table>
+  </div>
+
   <div class="deudascard">
     <header>
       <h2>🚨 Urgencia — Transferencias y Efectivo por girar</h2>
@@ -299,7 +307,7 @@ const ECHEQS = [
   [2026,9,25,3632645,"Wurth"],[2026,9,22,889121,"Nelson pinturas"],[2026,9,30,1168014,"Ausili"],[2026,9,6,618574,"Siccba"],[2026,9,20,618574,"Siccba"],[2026,9,20,515460,"Roer"],
   [2026,9,16,852687,"CNC insumos"],[2026,9,5,184955,"Malkoni"],[2026,9,5,1726891,"Argenpur"],[2026,10,5,1726891,"Argenpur"],[2026,11,5,1726891,"Argenpur"],[2026,11,20,1726891,"Argenpur"],
   [2026,9,3,2822899,"Experto"],[2026,9,12,2822899,"Experto"],[2026,9,30,2822899,"Experto"],[2026,10,15,2822899,"Experto"],[2026,10,30,2822899,"Experto"],[2026,11,15,2822899,"Experto"],
-  [2026,11,30,2822899,"Experto"]
+  [2026,11,30,2822899,"Experto"],[2026,8,25,2991862,"TRV"]
 ];
 
 const TRANSFERS = [
@@ -648,6 +656,27 @@ function renderTopList(){
   document.getElementById("topInfo").textContent = `Top 15 · ${monthCount} mes${monthCount===1?"":"es"} seleccionado${monthCount===1?"":"s"}${yearTxt}`;
 }
 
+function renderGrandesPagos(){
+  const paidNames = ["Mercadería 30%","Mercadería 70%"];
+  const items = COMPRAS_INTERNACIONALES.filter(r => !paidNames.some(p=>r[4].indexOf(p)!==-1));
+  const sorted = items.slice().sort((a,b)=>b[3]-a[3]);
+  const rows = sorted.map(r=>{
+    const fecha = String(r[2]).padStart(2,"0")+"/"+String(r[1]).padStart(2,"0")+"/"+r[0];
+    const nota = r[4].indexOf("fecha sin confirmar")!==-1 ? '<span class="ok-badge" style="margin-left:6px;">fecha sin confirmar</span>' : "";
+    return `<tr>
+      <td>${r[4].replace(" (fecha sin confirmar)","")}${nota}</td>
+      <td style="text-align:center">${fecha}</td>
+      <td class="amt">${fmtARS(r[3])}</td>
+    </tr>`;
+  }).join("");
+  const total = sorted.reduce((s,r)=>s+r[3],0);
+  document.getElementById("grandesPagosTable").innerHTML = `
+    <thead><tr><th>Concepto</th><th style="text-align:center">Fecha</th><th style="text-align:right">Monto</th></tr></thead>
+    <tbody>${rows}
+    <tr style="font-weight:700;border-top:2px solid #ccc;"><td>Total pendiente</td><td></td><td class="amt">${fmtARS(total)}</td></tr>
+    </tbody>`;
+}
+
 function renderUrgencia(){
   const items = [
     ...TRANSFERS_POR_GIRAR.map(r=>({proveedor:r[4], categoria:"transferencia", label:"Transferencia", monto:r[3], moneda:"ARS"})),
@@ -682,9 +711,10 @@ function updateSubtitle(){
   document.getElementById("subtitle").textContent =
     `Mostrando: ${mtxt} · año ${selectedYear==="todos"?"completo":selectedYear} · echeqs + transferencias (pagados) + cheques/transferencias/efectivo por girar (a pagar, según fecha de pago prevista)`;
   document.getElementById("footerNote").innerHTML =
-    `Datos sincronizados desde Google Drive · planilla "Historial de pagos" · foto al 09/09/2026 — reconstrucción completa de todas las categorías con foco en fechas de desembolso.<br>
-     Historial de cheques (673 filas, $1.171.129.587) y Historial de transferencias (70 filas con fecha, $52.076.873,65) recargados desde cero. Se excluyó 1 echeq de T.R.V por $2.991.862 (25/08/2026) marcado en la planilla como "cancelado" — nunca se desembolsó.<br>
-     Importante: el Historial de cheques ahora incluye varios echeqs con fecha de pago en septiembre/octubre/noviembre 2026 — son cheques YA emitidos (por eso están en el "historial" y no en "por girar"), aunque su cobro efectivo sea en el futuro. Es normal y así lo indicó el usuario.<br>
+    `Datos sincronizados desde Google Drive · planilla "Historial de pagos" · foto al 10/09/2026.<br>
+     Historial de cheques (674 filas, $1.174.121.449) y Historial de transferencias (70 filas con fecha, $52.076.873,65). Corrección: el echeq de T.R.V. por $2.991.862 (25/08/2026) marcado "cancelado" en la planilla SÍ está incluido — "cancelado" en este contexto significa pagado/saldado, no anulado (aclarado por el usuario).<br>
+     Importante: el Historial de cheques incluye varios echeqs con fecha de pago en septiembre/octubre/noviembre 2026 — son cheques YA emitidos (por eso están en el "historial" y no en "por girar"), aunque su cobro efectivo sea en el futuro. Es normal y así lo indicó el usuario.<br>
+     Nuevo: se agregó el apartado "💰 Mayores pagos pendientes" arriba de la tabla de Urgencia, con los montos más altos por girar (Compras internacionales — CNC Router y Dongtai), ordenados de mayor a menor, con fecha y detalle de cada concepto.<br>
      6 transferencias del historial (Gas $540.000, Bayma $440.000, Peralta $896.000, Listones $90.000, Espejo $36.600, Cugat $332.000 = $2.334.600) siguen sin fecha cargada en la planilla — no están incluidas en el gráfico mensual.<br>
      Cheques por girar (28 filas, $27.724.770) y Transferencias por girar (15 filas, todas con fecha 10/09/2026, $6.058.973,97) recalculados fila por fila desde cero — la lista de cheques por girar cambió casi por completo respecto a la sincronización anterior porque muchos ya fueron emitidos (ver nota arriba). Corrección aplicada: un cheque de "Todo fer" por $558.324 tenía año "2025" en la planilla (imposible para un cheque a girar) — se corrigió a 2026.<br>
      Efectivo por girar: la planilla "Efectivo por pagar" ya no existe en el archivo → $0. Tarjetas "Deudas" y "Efectivo y Depósito bancario" siguen sin mostrarse por no tener pestaña de origen verificable.<br>
@@ -702,6 +732,7 @@ function rerender(){
   renderKpis();
   renderChart();
   renderTopList();
+  renderGrandesPagos();
   renderUrgencia();
 }
 
