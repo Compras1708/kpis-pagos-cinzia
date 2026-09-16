@@ -12,7 +12,7 @@
 <title>KPIs Pagos · Echeqs, Transferencias y Por Girar</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
 <style>
-  :root { color-scheme: light; --ech:#FB8C00; --tr:#FBC02D; --efh:#43A047; --pg:#8E24AA; --trpg:#E53935; --efpg:#B71C1C; --intl:#C62828; --deuda:#D32F2F; --ink:#1f1f1f; --muted:#666; --line:#e5e5e5; --bg:#fafafa; }
+  :root { color-scheme: light; --ech:#FB8C00; --tr:#FBC02D; --efh:#43A047; --pg:#8E24AA; --trpg:#BA68C8; --efpg:#B71C1C; --intl:#C62828; --deuda:#D32F2F; --ink:#1f1f1f; --muted:#666; --line:#e5e5e5; --bg:#fafafa; }
   * { box-sizing: border-box; }
   body { margin: 0; padding: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
   .wrap { max-width: 1400px; margin: 0 auto; padding: 28px 32px; }
@@ -144,14 +144,14 @@
 
     <div class="chartcard">
       <h2 id="chartTitle">Pagos por mes (fecha de pago prevista)</h2>
-      <div class="ssub">Naranja = echeqs (historial). Amarillo = transferencias (historial). Verde = efectivo (historial). Morado = cheques por girar. Rojo = transferencias por girar. Rojo/dorado 🇨🇳 = compras internacionales (China), un tono por proveedor — el nombre del proveedor aparece dentro del tramo de la barra. Rojo oscuro = efectivo por girar (destacados para marcar urgencia).</div>
+      <div class="ssub">Naranja = echeqs (historial). Amarillo = transferencias (historial). Verde = efectivo (historial). Morado = cheques por girar. Morado claro = transferencias por girar. Rojo/dorado 🇨🇳 = compras internacionales (China), un tono por proveedor — el nombre del proveedor aparece dentro del tramo de la barra. Rojo oscuro = efectivo por girar (destacados para marcar urgencia).</div>
       <div class="chart-wrap"><canvas id="chartTotal"></canvas></div>
       <div class="legendrow">
         <div class="it"><span class="swatch" style="background:#FB8C00"></span>Echeqs (historial)</div>
         <div class="it"><span class="swatch" style="background:#FBC02D"></span>Transferencias (historial)</div>
         <div class="it"><span class="swatch" style="background:#43A047"></span>Efectivo (historial)</div>
         <div class="it"><span class="swatch" style="background:#8E24AA"></span>Cheques por girar</div>
-        <div class="it"><span class="swatch" style="background:#E53935"></span>Transferencias por girar</div>
+        <div class="it"><span class="swatch" style="background:#BA68C8"></span>Transferencias por girar</div>
         <div class="it"><span class="swatch" style="background:#C62828"></span>🇨🇳 CNC Router</div>
         <div class="it"><span class="swatch" style="background:#E64A19"></span>🇨🇳 Dongtai</div>
         <div class="it"><span class="swatch" style="background:#F9A825"></span>🇨🇳 SANJO</div>
@@ -328,7 +328,8 @@ const TRANSFERS = [
   [2026,7,24,253900,"Espejos"],[2026,7,24,375000,"ESPEJOpvc"],[2026,8,14,761890,"Luces"],[2026,8,14,60000,"Zincados"],[2026,8,14,1062000,"Peralta"],
   [2026,8,14,1665000,"Rototech"],[2026,8,14,254400,"Perillas"],[2026,8,14,216000,"Espejo"],[2026,8,14,816750,"Legitel"],[2026,8,14,145200,"Cugat"],
   [2026,8,14,618390,"Thinner"],[2026,8,14,66600,"Sbacco"],[2026,8,14,255625.43,"G y G"],[2026,8,14,1409400,"Patas camper"],[2026,8,14,725000,"Gas"],
-  [2026,9,1,491516,"LUBOX"],[2026,9,1,160000,"Listones"],[2026,9,1,234000,"GUAYABI"],[2026,9,1,216000,"Espejo"],[2026,9,10,220000,"Bayma"]
+  [2026,9,1,491516,"LUBOX"],[2026,9,1,160000,"Listones"],[2026,9,1,234000,"GUAYABI"],[2026,9,1,216000,"Espejo"],[2026,9,10,220000,"Bayma"],
+  [2026,8,14,540000,"Gas"],[2026,8,14,440000,"Bayma"],[2026,8,14,896000,"Peralta"],[2026,8,14,90000,"Listones"],[2026,8,14,36600,"Espejo"],[2026,8,14,332000,"Cugat"]
 ];
 
 // "Historial efectivo" — pestaña de la planilla con pagos en efectivo ya realizados, cargados por mes (sin día exacto) pero con año explícito en la columna "Año" (2026 para todas las filas cargadas).
@@ -401,7 +402,7 @@ const ODOO_ANTIGUEDAD = {
 const CURRENT_YEAR = 2026, CURRENT_MONTH = 9;
 const MONTH_NAMES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const MONTH_SHORT = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
-const COLOR_ECH = "#FB8C00", COLOR_TR = "#FBC02D", COLOR_EFH = "#43A047", COLOR_PG = "#8E24AA", COLOR_TRPG = "#E53935", COLOR_EFPG = "#B71C1C", COLOR_CNC = "#C62828", COLOR_DONGTAI = "#E64A19", COLOR_SANJO = "#F9A825", GREY = "#E0E0E0";
+const COLOR_ECH = "#FB8C00", COLOR_TR = "#FBC02D", COLOR_EFH = "#43A047", COLOR_PG = "#8E24AA", COLOR_TRPG = "#BA68C8", COLOR_EFPG = "#B71C1C", COLOR_CNC = "#C62828", COLOR_DONGTAI = "#E64A19", COLOR_SANJO = "#F9A825", GREY = "#E0E0E0";
 
 // Clasifica cada fila de COMPRAS_INTERNACIONALES por proveedor chino, según el prefijo del nombre del concepto.
 function intlProvider(name){
@@ -495,7 +496,7 @@ function renderChart(){
     {label:"Transferencias", data:tr, backgroundColor:labels.map((_,i)=>dim(COLOR_TR,i)), borderColor:"#F57F17", borderWidth:0.5, stack:"s"},
     {label:"Efectivo (historial)", data:efh, backgroundColor:labels.map((_,i)=>dim(COLOR_EFH,i)), borderColor:"#1B5E20", borderWidth:0.5, stack:"s"},
     {label:"Cheques por girar", data:pg, backgroundColor:labels.map((_,i)=>dim(COLOR_PG,i)), borderColor:"#4A148C", borderWidth:0.5, stack:"s"},
-    {label:"Transferencias por girar", data:trpg, backgroundColor:labels.map((_,i)=>dim(COLOR_TRPG,i)), borderColor:"#B71C1C", borderWidth:0.5, stack:"s"},
+    {label:"Transferencias por girar", data:trpg, backgroundColor:labels.map((_,i)=>dim(COLOR_TRPG,i)), borderColor:"#6A1B9A", borderWidth:0.5, stack:"s"},
     {label:"🇨🇳 CNC Router", data:intlCnc, backgroundColor:labels.map((_,i)=>dim(COLOR_CNC,i)), borderColor:"#7F0000", borderWidth:0.5, stack:"s", chinaLabel:"CNC"},
     {label:"🇨🇳 Dongtai", data:intlDongtai, backgroundColor:labels.map((_,i)=>dim(COLOR_DONGTAI,i)), borderColor:"#A3320B", borderWidth:0.5, stack:"s", chinaLabel:"Dongtai"},
     {label:"🇨🇳 SANJO", data:intlSanjo, backgroundColor:labels.map((_,i)=>dim(COLOR_SANJO,i)), borderColor:"#C17900", borderWidth:0.5, stack:"s", chinaLabel:"SANJO"},
@@ -657,7 +658,7 @@ function showWeekBreakdown(month){
     {label:"Transferencias", data:data.map(function(x){return x.tr;}), backgroundColor:COLOR_TR, borderColor:"#F57F17", borderWidth:0.5, stack:"s"},
     {label:"Efectivo (historial)", data:data.map(function(x){return x.efh;}), backgroundColor:COLOR_EFH, borderColor:"#1B5E20", borderWidth:0.5, stack:"s"},
     {label:"Cheques por girar", data:data.map(function(x){return x.pg;}), backgroundColor:COLOR_PG, borderColor:"#4A148C", borderWidth:0.5, stack:"s"},
-    {label:"Transferencias por girar", data:data.map(function(x){return x.trpg;}), backgroundColor:COLOR_TRPG, borderColor:"#B71C1C", borderWidth:0.5, stack:"s"},
+    {label:"Transferencias por girar", data:data.map(function(x){return x.trpg;}), backgroundColor:COLOR_TRPG, borderColor:"#6A1B9A", borderWidth:0.5, stack:"s"},
     {label:"🇨🇳 CNC Router", data:data.map(function(x){return x.intlCnc;}), backgroundColor:COLOR_CNC, borderColor:"#7F0000", borderWidth:0.5, stack:"s", chinaLabel:"CNC"},
     {label:"🇨🇳 Dongtai", data:data.map(function(x){return x.intlDongtai;}), backgroundColor:COLOR_DONGTAI, borderColor:"#A3320B", borderWidth:0.5, stack:"s", chinaLabel:"Dongtai"},
     {label:"🇨🇳 SANJO", data:data.map(function(x){return x.intlSanjo;}), backgroundColor:COLOR_SANJO, borderColor:"#C17900", borderWidth:0.5, stack:"s", chinaLabel:"SANJO"},
@@ -808,8 +809,8 @@ function updateSubtitle(){
     `Mostrando: ${mtxt} · año ${selectedYear==="todos"?"completo":selectedYear} · echeqs + transferencias (pagados) + cheques/transferencias/efectivo por girar (a pagar, según fecha de pago prevista)`;
   document.getElementById("footerNote").innerHTML =
     `Datos sincronizados desde Google Drive · planilla "Historial de pagos" · foto al 16/09/2026.<br>
-     Historial de cheques (689 filas, $1.194.307.676) y Historial de transferencias (70 filas con fecha, $10.189.256,79), sin cambios respecto a la sincronización anterior salvo los echeqs nuevos ya emitidos. Corrección previa vigente: el echeq de T.R.V. por $2.991.862 (25/08/2026) marcado "cancelado" en la planilla SÍ está incluido — "cancelado" en este contexto significa pagado/saldado, no anulado (aclarado por el usuario).<br>
-     <b>Ojo:</b> aparecieron 6 transferencias nuevas en el historial sin fecha cargada (Gas $540.000, Bayma $440.000, Peralta $896.000, Listones $90.000, Espejo $36.600, Cugat $332.000 = $2.334.600) — no están incluidas en el gráfico mensual porque no se sabe en qué mes ubicarlas. Avisar la fecha para sumarlas.<br>
+     Historial de cheques (689 filas, $1.194.307.676) y Historial de transferencias (76 filas, $54.411.473,65). Corrección previa vigente: el echeq de T.R.V. por $2.991.862 (25/08/2026) marcado "cancelado" en la planilla SÍ está incluido — "cancelado" en este contexto significa pagado/saldado, no anulado (aclarado por el usuario).<br>
+     Las 6 transferencias que habían quedado sin fecha (Gas $540.000, Bayma $440.000, Peralta $896.000, Listones $90.000, Espejo $36.600, Cugat $332.000 = $2.334.600) ya están incluidas, con fecha 14/08/2026 (indicado por el usuario: "ponelas en el mes de agosto") — no había día exacto, se usó el 14 por ser la fecha más frecuente entre las demás transferencias de agosto.<br>
      También aparecieron 2 filas nuevas en "Historial efectivo" sin monto cargado (Distribuidora mediterránea de gas y Lonas Bedran, ambas febrero 2026) — no están incluidas por no tener importe.<br>
      Cheques por girar (26 filas, $37.523.725) y Transferencias por girar (19 filas, todas con fecha 20/09/2026, $12.143.310,27) recalculados fila por fila desde cero. Corrección aplicada: un cheque de "Todo fer" por $1.000.000 tenía año "2025" en la planilla (imposible para un cheque a girar, mismo patrón visto antes) — se corrigió a 2026.<br>
      <b>Ojo:</b> un cheque de "Nelson" por $1.759.716 en "Cheques por girar" figura con fecha 14/06/2026, que ya pasó — no sigue un patrón de error obvio (a diferencia de "Todo fer"), así que se dejó tal cual está en la planilla. Avisar si corresponde otra fecha.<br>
@@ -821,6 +822,7 @@ function updateSubtitle(){
      Efectivo por girar: la planilla "Efectivo por pagar" ya no existe en el archivo → $0.<br>
      Efectivo (historial): $20.439.492 en pagos ya realizados, sin cambios respecto a la sincronización anterior.<br>
      La tabla "Urgencia" usa antigüedad de pedidos en Odoo calculada el 29/07 (no actualizada en esta sincronización).<br>
+     "Transferencias por girar" cambió de rojo a morado claro (mismo tono de familia que "Cheques por girar", morado) para reflejar visualmente que ambas categorías son "por girar" — a pedido del usuario.<br>
      Hacé click en cualquier barra del gráfico mensual para ver el desglose semanal de ese mes.`;
 }
 
