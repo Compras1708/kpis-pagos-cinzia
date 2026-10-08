@@ -219,7 +219,7 @@ const EFECTIVO_HISTORIAL = [
 // "Echeqs por girar" (antes "Cheques por girar") — releído 08/10/2026 desde Google Sheets. 42 filas. Los echeqs ya emitidos pasaron al "Historial echeq".
 // Correcciones aplicadas: (1) "Todo fer" $1.000.000 figuraba 29/10/2025 (error de año recurrente) → 29/10/2026. (2) 6 cheques de "Experto" $4.459.376 figuraban todos con fecha 16/10/2025; se pasaron a 2026 y se escalonaron según el sufijo del nombre (-0, -15, -30, -45, -60, -75 días) → 16/10, 31/10, 15/11, 30/11, 15/12 y 30/12/2026. (3) Se excluyó "Embalacor" $300.452 del 17/09/2025 (ya pagado en el historial, doble conteo). (4) Se excluyó "Mauro trovato" $350.000 del 10/10/2026 (ya figura en "Historial echeq").
 const POR_GIRAR = [
-[2026,10,25,732600,"Montegoma"],[2026,10,30,2351340,"Caram"],[2026,11,10,2351340,"Caram"],[2026,10,29,1310725,"Alfaser"],[2026,11,14,1310725,"Alfaser"],[2026,10,24,1450048,"Servet"],[2026,11,24,1450048,"Servet"],[2026,12,24,1450048,"Servet"],[2026,10,24,402264,"Tapihouse"],[2026,11,6,1234212,"Tapihouse"],[2026,10,24,760010,"Cáceres"],[2026,10,25,1533065,"TRV"],[2026,11,10,1533065,"TRV"],[2026,11,30,1533064,"TRV"],[2026,10,24,1268963,"Wurth"],[2026,11,9,1268963,"Wurth"],[2026,10,30,1684619,"Rusmar"],[2026,11,15,1684619,"Rusmar"],[2026,10,29,1000000,"Todo fer"],[2026,10,3,331067,"Fresur"],[2026,10,18,331068,"Fresur"],[2026,11,1,609075,"Servet"],[2026,12,1,609075,"Servet"],[2027,1,1,609075,"Servet"],[2026,10,22,1577025,"Peusso"],[2026,11,7,1577025,"Peusso"],[2026,11,22,1577026,"Peusso"],[2026,11,11,825000,"Cattaneo"],[2026,10,21,1066804,"Wurth"],[2026,11,1,1066804,"Wurth"],[2026,11,10,1000000,"Dintra"],[2026,10,15,807312,"Lembo"],[2026,10,21,484000,"Roer S.A.S"],[2026,11,7,592900,"Roer S.A.S"],[2026,11,6,887531,"Nelson pinturas"],[2026,10,23,787424,"Autodo"],[2026,10,10,4459376,"Experto"],[2026,10,25,4459376,"Experto"],[2026,11,10,4459376,"Experto"],[2026,11,25,4459376,"Experto"],[2026,12,10,4459376,"Experto"],[2026,12,25,4459376,"Experto"],[2026,10,7,399009,"Embalacor"]
+[2026,10,25,732600,"Montegoma"],[2026,10,30,2351340,"Caram"],[2026,11,10,2351340,"Caram"],[2026,10,29,1310725,"Alfaser"],[2026,11,14,1310725,"Alfaser"],[2026,10,24,1450048,"Servet"],[2026,11,24,1450048,"Servet"],[2026,12,24,1450048,"Servet"],[2026,10,24,402264,"Tapihouse"],[2026,11,6,1234212,"Tapihouse"],[2026,10,24,760010,"Cáceres"],[2026,10,25,1533065,"TRV"],[2026,11,10,1533065,"TRV"],[2026,11,30,1533064,"TRV"],[2026,10,24,1268963,"Wurth"],[2026,11,9,1268963,"Wurth"],[2026,10,30,1684619,"Rusmar"],[2026,11,15,1684619,"Rusmar"],[2026,10,29,1000000,"Todo fer"],[2026,10,3,331067,"Fresur"],[2026,10,18,331068,"Fresur"],[2026,11,1,609075,"Servet"],[2026,12,1,609075,"Servet"],[2026,10,22,1577025,"Peusso"],[2026,11,7,1577025,"Peusso"],[2026,11,22,1577026,"Peusso"],[2026,11,11,825000,"Cattaneo"],[2026,10,21,1066804,"Wurth"],[2026,11,1,1066804,"Wurth"],[2026,11,10,1000000,"Dintra"],[2026,10,15,807312,"Lembo"],[2026,10,21,484000,"Roer S.A.S"],[2026,11,7,592900,"Roer S.A.S"],[2026,11,6,887531,"Nelson pinturas"],[2026,10,23,787424,"Autodo"],[2026,10,10,4459376,"Experto"],[2026,10,25,4459376,"Experto"],[2026,11,10,4459376,"Experto"],[2026,11,25,4459376,"Experto"],[2026,12,10,4459376,"Experto"],[2026,12,25,4459376,"Experto"],[2026,10,7,399009,"Embalacor"]
 ];
 
 // "Transferencias por girar" — releído 08/10/2026 desde Google Sheets. 10 filas, $4.309.284,97.
@@ -245,15 +245,15 @@ const EFECTIVO_POR_GIRAR_USD = [
 const COMPRAS_INTERNACIONALES = [
   [2025,12,28,17328000,"CNC Router - Mercadería 30%"],
   [2026,6,18,32528000,"CNC Router - Mercadería 70%"],
-  [2026,10,15,14972000,"CNC Router - Forwarder"],
-  [2026,10,15,26644800,"CNC Router - Nacionalización"],
-  [2026,10,15,1062480,"CNC Router - Despachante"],
-  [2026,10,15,500000,"CNC Router - Camión"],
+  [2026,10,20,14972000,"CNC Router - Forwarder"],
+  [2026,10,20,26644800,"CNC Router - Nacionalización"],
+  [2026,11,15,1062480,"CNC Router - Despachante"],
+  [2026,10,20,500000,"CNC Router - Camión"],
   [2026,10,30,1342031,"CNC Router - Depósito fiscal Malvinas"],
   [2026,5,1,20854400,"Dongtai - Pago 30%"],
-  [2026,10,10,52865600,"Dongtai - Pago 70%"],
-  [2026,10,5,11284176,"SANJO - Pago 30%"],
-  [2027,1,15,26329744,"SANJO - Pago 70%"]
+  [2026,11,10,52865600,"Dongtai - Pago 70%"],
+  [2026,11,10,11284176,"SANJO - Pago 30%"]
+  // SANJO - Pago 70% (U$D 17.322,20, 15/1/2027) excluido a pedido del usuario: no se tiene en cuenta lo de 2027.
 ];
 
 // Antigüedad del pedido en Odoo ("Fecha límite de pedido" = date_order), en días, al 29/07/2026.
@@ -334,7 +334,7 @@ function renderKpis(){
     {lbl:"Cheques por girar", val:fmtMill(pg), sub:"pendientes de emitir", cls:"pg"},
     {lbl:"Transferencias por girar", val:fmtMill(trpg), sub:"pendientes de hacer", cls:"trpg"},
     {lbl:"Efectivo por girar", val:fmtMill(efpg), sub:"pendiente de pagar en efectivo", cls:"efpg"},
-    {lbl:"Compras internacionales", val:fmtMill(intl), sub:"🇨🇳 CNC Router + Dongtai + SANJO · U$D 134.358,2 (TC 1500/1520)", cls:"intl"},
+    {lbl:"Compras internacionales", val:fmtMill(intl), sub:"🇨🇳 CNC Router + Dongtai + SANJO · U$D 117.036 sin lo de 2027 (TC 1500/1520)", cls:"intl"},
     {lbl:MONTH_NAMES[CURRENT_MONTH-1]+" (mes actual)", val:fmtMill(mesTot), sub:"todas las categorías", cls:"total"},
     {lbl:"Total a desembolsar", val:fmtMill(totPorGirar), sub:"cheques + transf. + efectivo por girar", cls:"total"}
   ];
@@ -684,7 +684,7 @@ function updateSubtitle(){
      4) Se sigue excluyendo "Mauro trovato" $350.000 (10/10/2026) de "por girar" porque ya figura en el historial (doble conteo).<br>
      5) Excluidas por datos incompletos: "Tapihouse-30" (sin monto, fecha 30/10/2025 mal ubicada) y 2 filas duplicadas de "Cáceres ferretería-30" $723.032 (cheque P02176, sin fecha de pago; la fecha 20/08/2026 está en otra columna).<br>
      6) Sin cambios respecto a la sincronización anterior: "Transferencias por girar" sigue sin fechas (se usa 08/10/2026 provisoria) y las 6 transferencias de agosto sin fecha siguen en 14/08/2026.<br>
-     Compras internacionales: sin cambios respecto al 28/09 (U$D 134.358,2 en total; TC 1500 nacionalización, TC 1520 el resto).<br>
+     Compras internacionales: fechas movidas según la planilla — Dongtai 70% y SANJO 30% a 10/11/2026; nacionalización, forwarder y camión a 20/10; despachante a 15/11 (depósito fiscal sigue 30/10). Total U$D 117.036 (TC 1500 nacionalización, TC 1520 el resto). Por pedido del usuario NO se tiene en cuenta nada de 2027: se quitaron SANJO 70% (U$D 17.322,20, 15/01/2027) y un cheque de Servet $609.075 (01/01/2027). Ojo: la sección "En planeación" de la planilla todavía muestra el 70% de Dongtai el 10/10/2026 (distinto al 10/11 del bloque principal); se usó 10/11.<br>
      La tabla "Urgencia" usa antigüedad de pedidos en Odoo calculada el 29/07 (no actualizada).<br>
      Hacé click en cualquier barra del gráfico mensual para ver el desglose semanal de ese mes.`;
 }
