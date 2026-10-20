@@ -243,7 +243,6 @@ const TRANSFERS_POR_GIRAR = [
 
 // "Efectivo por girar" — la pestaña volvió a existir (08/10/2026): 1 fila, DM oleohidráulica $6.776.000, mes 10/2026 sin día exacto → día 15 aproximado. Se nombra "DM oleohidraulica" para coincidir con la tabla de antigüedad de Odoo.
 const EFECTIVO_POR_GIRAR = [
-[2026,10,15,6776000,"DM oleohidraulica"]
 ];
 const EFECTIVO_POR_GIRAR_USD = [
 ];
@@ -689,14 +688,14 @@ function updateSubtitle(){
      La planilla se reorganizó: ahora las pestañas son "Historial echeq", "Historial cheques fisicos" (nueva), "Historial transferencias", "Historial efectivo", "Echeqs por girar", "Efectivo por girar" (volvió), "Transferencias por girar" y "Compras internacionales".<br>
      Historial de echeqs + cheques físicos (771 filas, $1.296.682.574) y Historial de transferencias (117 filas, $76.142.374,34). El cheque físico de Caram $7.500.000 (10/10/2026) está sumado al historial de cheques (la pestaña ya no lista el de Neil $7.500.000, que se quitó). Los echeqs que antes estaban "por girar" y ya pasaron al "Historial echeq" (Servet, TRV, Wurth, Caram, Alfaser, Tapihouse, Fresur, Malkoni, etc.) se tomaron desde el historial; se excluyó el Servet de 01/01/2027. Corrección previa vigente: el echeq de T.R.V. por $2.991.862 (25/08/2026) marcado "cancelado" SÍ está incluido (cancelado = pagado/saldado).<br>
      Las 6 transferencias antiguas sin fecha (Gas, Bayma, Peralta, Listones, Espejo, Cugat = $2.334.600) siguen sin fecha en la planilla — se mantienen en 14/08/2026 (indicado por el usuario).<br>
-     Echeqs por girar (24 filas, $41.388.936, sin 2027), Transferencias por girar (15 filas, $9.756.034,97) y Efectivo por girar (1 fila, DM oleohidráulica $6.776.000, mes 10/2026 → día 15 aproximado) recalculados desde cero. "Historial efectivo": se sumó DM oleohidráulica $6.336.000 (10/2026, día 15 aprox.) → $26.775.492.<br>
+     Echeqs por girar (24 filas, $41.388.936, sin 2027), Transferencias por girar (15 filas, $9.756.034,97) y Efectivo por girar (vacío: el usuario quitó DM oleohidráulica $6.776.000, que ya figura en el historial de efectivo) recalculados desde cero. "Historial efectivo": se sumó DM oleohidráulica $6.336.000 (10/2026, día 15 aprox.) → $26.775.492.<br>
      <b>Ojo — cosas para revisar en la planilla:</b><br>
      1) Actualización tras correcciones del usuario: las 7 transferencias que no tenían fecha ya figuran con 01/10/2026 y se incluyeron (incluida "THINNER transferencia erronea" $412.260, que tal como figura en la planilla se sumó). Se quitó "Borneras" $686.675,97 del 23/09 (ya no está en la planilla) y "Siccba-45" quedó corregido a $730.111. Se dejó tal cual: "Thinner $412.260" y "Borneras $686.675,97" siguen también en "Transferencias por girar".<br>
      2) "Transferencias por girar" sigue sin fechas en ninguna fila — se usó 20/10/2026 como fecha provisoria. Nuevas: Peralta gom $616.000, Homologación $220.000 ×3 (¿son 3 cuotas con fechas distintas?) e Ireaya $4.349.950; "Cargador" bajó de $355.000 a $175.800.<br>
      3) "Experto" $4.459.376 tiene fechas nuevas (24/10, 09/11, 24/11, 09/12, 24/12; el de 09/01/2027 se excluyó). "Embalacor" $399.009 quedó 07/11/2026. En "Historial echeq" siguen apareciendo "Todo fer" con año 2025 (se interpretan como 2026).<br>
      4) "Roer" $561.040 en "Echeqs por girar" figura con fecha 20/09/2026 (ya pasada) — se incluyó en septiembre; revisar si corresponde.<br>
      5) Excluida por datos incompletos: "Tapihouse" $0 (30/10/2025) del historial.<br>
-     6) La transferencia nueva sin fecha "HDMI" $13.596 (compucordoba) se ubicó en 14/08/2026 igual que las 6 anteriores sin fecha. "Historial efectivo": DM oleohidráulica $6.336.000 (oct) y en "Efectivo por girar" DM $6.776.000 (oct) — se cuentan ambos; revisar que no sea doble conteo.<br>
+     6) La transferencia nueva sin fecha "HDMI" $13.596 (compucordoba) se ubicó en 14/08/2026 igual que las 6 anteriores sin fecha. Doble conteo de DM oleohidráulica resuelto: "Efectivo por girar" quedó vacío.<br>
      Compras internacionales: fechas según la planilla — Dongtai 70% y SANJO 30% 10/11/2026; nacionalización y camión 01/11; despachante 15/11; depósito fiscal 16/11; forwarder 20/11. Total U$D 117.036 convertido a TC 1540 (nacionalización a TC 1524,5). Por pedido del usuario NO se tiene en cuenta nada de 2027: se quitaron SANJO 70% (U$D 17.322,20, 15/01/2027) y un cheque de Servet $609.075 (01/01/2027). Ojo: la sección "En planeación" de la planilla todavía muestra el 70% de Dongtai el 10/10/2026 (distinto al 10/11 del bloque principal); se usó 10/11.<br>
      La tabla "Urgencia" usa antigüedad de pedidos en Odoo calculada el 29/07 (no actualizada).<br>
      Hacé click en cualquier barra del gráfico mensual para ver el desglose semanal de ese mes.`;
